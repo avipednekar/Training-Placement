@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Placement Dashboard</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { primary: "#4a90e2", secondary: "#1a2236" },
+            borderRadius: {
+              none: "0px",
+              sm: "4px",
+              DEFAULT: "8px",
+              md: "12px",
+              lg: "16px",
+              xl: "20px",
+              "2xl": "24px",
+              "3xl": "32px",
+              full: "9999px",
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+    <style>
+      :where([class^="ri-"])::before { content: "\f3c2"; }
+      body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8f9fa;
+      }
+      .sidebar {
+      width: 250px;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background-color: #1a2236;
+      transition: all 0.3s ease;
+      z-index: 10;
+      }
+      .main-content {
+      margin-left: 250px;
+      min-height: 100vh;
+      transition: all 0.3s ease;
+      }
+      .nav-item {
+      position: relative;
+      }
+      .nav-item.active {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-left: 4px solid #4a90e2;
+      }
+      .nav-item.active .nav-link {
+      padding-left: 20px;
+      }
+      .nav-item:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      }
+      .search-input {
+      background-color: #f5f6fa;
+      border-radius: 8px;
+      }
+      .search-input:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+      }
+      .card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease;
+      }
+      .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+      }
+      .status-badge {
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      }
+      .status-placed {
+      background-color: rgba(52, 199, 89, 0.1);
+      color: #34c759;
+      }
+      .status-progress {
+      background-color: rgba(255, 149, 0, 0.1);
+      color: #ff9500;
+      }
+      .status-not-started {
+      background-color: rgba(142, 142, 147, 0.1);
+      color: #8e8e93;
+      }
+      .activity-item {
+      position: relative;
+      padding-left: 28px;
+      }
+      .activity-item::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background-color: #e8e9ec;
+      }
+      .activity-dot {
+      position: absolute;
+      left: 6px;
+      top: 6px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #4a90e2;
+      z-index: 1;
+      }
+      input[type="checkbox"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #d1d5db;
+      border-radius: 4px;
+      position: relative;
+      cursor: pointer;
+      }
+      input[type="checkbox"]:checked {
+      background-color: #4a90e2;
+      border-color: #4a90e2;
+      }
+      input[type="checkbox"]:checked::after {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 2px;
+      width: 6px;
+      height: 10px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+      }
+      .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      }
+      .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      }
+      .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #e8e9ec;
+      transition: .3s;
+      border-radius: 34px;
+      }
+      .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+      }
+      input:checked + .slider {
+      background-color: #4a90e2;
+      }
+      input:checked + .slider:before {
+      transform: translateX(20px);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="flex">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="py-6 px-5">
+          <!-- <h1 class="text-white text-2xl font-['Pacifico']">logo</h1> -->
+          <img src="/Frontend/assets/logo-wide.png" alt="" class="h-16 mx-auto mb-5" >
+        </div>
+        <div class="mt-6">
+          <ul>
+            <li class="nav-item active">
+              <a
+                href="#"
+                class="nav-link flex items-center text-white py-3 px-6"
+              >
+                <div class="w-6 h-6 flex items-center justify-center mr-3">
+                  <i class="ri-dashboard-line"></i>
+                </div>
+                <span>Dashboard</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                href="#"
+                class="nav-link flex items-center text-white py-3 px-6"
+              >
+                <div class="w-6 h-6 flex items-center justify-center mr-3">
+                  <i class="ri-briefcase-line"></i>
+                </div>
+                <span>Jobs</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                href="#"
+                class="nav-link flex items-center text-white py-3 px-6"
+              >
+                <div class="w-6 h-6 flex items-center justify-center mr-3">
+                  <i class="ri-building-line"></i>
+                </div>
+                <span>Companies</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                href="#"
+                class="nav-link flex items-center text-white py-3 px-6"
+              >
+                <div class="w-6 h-6 flex items-center justify-center mr-3">
+                  <i class="ri-calendar-line"></i>
+                </div>
+                <span>Interviews</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                href="#"
+                class="nav-link flex items-center text-white py-3 px-6"
+              >
+                <div class="w-6 h-6 flex items-center justify-center mr-3">
+                  <i class="ri-file-list-line"></i>
+                </div>
+                <span>Applications</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                href="#"
+                class="nav-link flex items-center text-white py-3 px-6"
+              >
+                <div class="w-6 h-6 flex items-center justify-center mr-3">
+                  <i class="ri-notification-line"></i>
+                </div>
+                <span>Notifications</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="absolute bottom-0 w-full border-t border-gray-700 py-4 px-6">
+          <a href="#" class="flex items-center text-white">
+            <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center mr-3">
+              <span class="text-white text-sm font-medium profile-initial">JS</span>
+            </div>
+            <div>
+              <p id="sidebarName" class="text-sm font-medium">James Smith</p>
+              <p id="sidebarEmail" class="text-xs text-gray-400">Computer Science</p>
+            </div>
+          </a>
+        </div>
+      </div>
+      <!-- Main Content -->
+      <div class="main-content w-full">
+        <!-- Header -->
+        <header
+          class="bg-white h-[70px] flex items-center justify-between px-6 border-b border-gray-200 shadow-sm"
+        >
+          <div class="relative">
+            <div
+              class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"
+            >
+              <div
+                class="w-5 h-5 flex items-center justify-center text-gray-400"
+              >
+                <i class="ri-search-line"></i>
+              </div>
+            </div>
+            <input
+              type="text"
+              class="search-input pl-10 pr-4 py-2 w-[300px] text-sm border-none"
+              placeholder="Search for jobs, companies..."
+            />
+          </div>
+          <div class="flex items-center space-x-6">
+            <div class="relative">
+              <div
+                id="notificationButton"
+                class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 cursor-pointer"
+              >
+                <i class="ri-notification-3-line text-gray-600"></i>
+              </div>
+              <span
+                class="absolute top-1 right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs"
+                >3</span
+              >
+              <div
+                id="notificationPanel"
+                class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+              >
+                <div class="p-4 border-b border-gray-100">
+                  <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-semibold text-gray-800">
+                      Notifications
+                    </h3>
+                    <button
+                      id="markAllRead"
+                      class="text-xs text-primary hover:text-primary/80"
+                    >
+                      Mark all as read
+                    </button>
+                  </div>
+                </div>
+                <div class="max-h-96 overflow-y-auto">
+                  <div
+                    class="notification-item p-4 hover:bg-gray-50 border-b border-gray-100 cursor-pointer"
+                  >
+                    <div class="flex items-start">
+                      <div
+                        class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0"
+                      >
+                        <i class="ri-briefcase-line text-primary"></i>
+                      </div>
+                      <div class="ml-3 flex-grow">
+                        <p class="text-sm text-gray-800">
+                          New job posting from Microsoft matching your profile
+                        </p>
+                        <span class="text-xs text-gray-500"
+                          >10 minutes ago</span
+                        >
+                      </div>
+                      <div class="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                    </div>
+                  </div>
+                  <div
+                    class="notification-item p-4 hover:bg-gray-50 border-b border-gray-100 cursor-pointer"
+                  >
+                    <div class="flex items-start">
+                      <div
+                        class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0"
+                      >
+                        <i class="ri-calendar-line text-green-600"></i>
+                      </div>
+                      <div class="ml-3 flex-grow">
+                        <p class="text-sm text-gray-800">
+                          Your interview with Google has been scheduled
+                        </p>
+                        <span class="text-xs text-gray-500">1 hour ago</span>
+                      </div>
+                      <div class="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                    </div>
+                  </div>
+                  <div
+                    class="notification-item p-4 hover:bg-gray-50 cursor-pointer"
+                  >
+                    <div class="flex items-start">
+                      <div
+                        class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0"
+                      >
+                        <i class="ri-file-list-line text-yellow-600"></i>
+                      </div>
+                      <div class="ml-3">
+                        <p class="text-sm text-gray-800">
+                          Please complete your profile to improve job matches
+                        </p>
+                        <span class="text-xs text-gray-500">2 hours ago</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="p-4 border-t border-gray-100">
+                  <a
+                    href="#"
+                    class="block text-center text-sm text-primary hover:text-primary/80"
+                    >View All Notifications</a
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="relative">
+              <div
+                class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 cursor-pointer"
+              >
+                <i class="ri-message-2-line text-gray-600"></i>
+              </div>
+            </div>
+            <div class="h-8 border-l border-gray-200"></div>
+            <div class="flex items-center">
+              <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-2">
+                <span class="text-gray-700 text-sm font-medium profile-initial">JS</span>
+              </div>              
+              <div
+                class="w-5 h-5 flex items-center justify-center text-gray-600"
+              >
+                <i class="ri-arrow-down-s-line"></i>
+              </div>
+            </div>
+          </div>
+        </header>
+        <!-- Dashboard Content -->
+        <div class="p-6">
+          <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
+             <p class="text-gray-500">
+                 Welcome back, <span id="userName"></span>! Here's your placement journey overview.
+               </p>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Student Info Card -->
+            <div class="card p-6">
+              <div class="flex items-center mb-6">
+                <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center mr-4">
+                  <span class="text-gray-700 text-xl font-medium profile-initial">JS</span>
+                </div>                
+                <div>
+                  <h2 id="studentName" class="text-lg font-semibold text-gray-800"></h2>
+                    <p class="text-gray-500">
+                      Branch: <span id="studentBranch"></span>
+                      <span id="studentGraduationYear"></span>
+                    </p>
+                    <p class="text-sm text-gray-500">
+                      ID: <span id="studentRollNo"></span>
+                  </p>
+                </div>
+              </div>
+              <div class="border-t border-gray-100 pt-4">
+                <div class="flex justify-between items-center mb-3">
+                  <span class="text-gray-600 text-sm">Email:</span>
+               <span id="studentEmail" class="text-gray-800 text-sm"></span>
+                </div>
+                <div class="flex justify-between items-center mb-3">
+                  <span class="text-gray-600 text-sm">Phone:</span>
+                  <span id="studentPhone" class="text-gray-800 text-sm"></span>
+                </div>
+                <div class="flex justify-between items-center mb-3">
+                  <span class="text-gray-600 text-sm">CGPA:</span>
+                  <span id="studentCgpa" class="text-gray-800 text-sm font-medium"></span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600 text-sm">Resume:</span>
+                  <a href="#" class="text-primary text-sm flex items-center">
+                    <span>View</span>
+                    <div class="w-4 h-4 flex items-center justify-center ml-1">
+                      <i class="ri-external-link-line"></i>
+                    </div>
+                  </a>
+                </div>
+              </div>
+              <div class="mt-6">
+                <a
+  href="profile.html"
+  id="profileBtn"
+  class="w-full bg-primary text-white py-2 px-4 rounded-button flex items-center justify-center whitespace-nowrap"
+>
+                  <div class="w-5 h-5 flex items-center justify-center mr-2">
+                    <i class="ri-edit-line"></i>
+                  </div>
+                  <span>Update Profile</span>
+                </a>
+              </div>
+            </div>
+            <!-- Placement Status Card -->
+            <div class="card p-6">
+              <div class="flex justify-between items-center mb-6">
+                <h2 class="text-lg font-semibold text-gray-800">
+                  Placement Status
+                </h2>
+                <span class="status-badge status-placed">Placed</span>
+              </div>
+              <div class="mb-6">
+                <div class="flex items-center mb-2">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mr-3"
+                  >
+                    <div
+                      class="w-5 h-5 flex items-center justify-center text-primary"
+                    >
+                      <i class="ri-building-4-line"></i>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 class="font-medium text-gray-800">
+                      Microsoft Corporation
+                    </h3>
+                    <p class="text-sm text-gray-500">Software Engineer</p>
+                  </div>
+                </div>
+                <div class="flex justify-between text-sm mt-4">
+                  <div>
+                    <p class="text-gray-500">Offer Date</p>
+                    <p class="font-medium text-gray-800">April 15, 2025</p>
+                  </div>
+                  <div>
+                    <p class="text-gray-500">Joining Date</p>
+                    <p class="font-medium text-gray-800">July 10, 2025</p>
+                  </div>
+                  <div>
+                    <p class="text-gray-500">Package</p>
+                    <p class="font-medium text-gray-800">$95,000/yr</p>
+                  </div>
+                </div>
+              </div>
+              <div class="border-t border-gray-100 pt-4">
+                <h3 class="text-sm font-medium text-gray-700 mb-3">
+                  Placement Journey
+                </h3>
+                <div class="relative">
+                  <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      class="h-full bg-primary rounded-full"
+                      style="width: 100%"
+                    ></div>
+                  </div>
+                  <div class="flex justify-between mt-2 text-xs">
+                    <span class="text-gray-500">Applied</span>
+                    <span class="text-gray-500">Interview</span>
+                    <span class="text-gray-500">Offer</span>
+                    <span class="text-gray-500">Placed</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-6">
+                <button
+                  class="w-full border border-gray-300 text-gray-700 py-2 px-4 rounded-button flex items-center justify-center whitespace-nowrap"
+                >
+                  <div class="w-5 h-5 flex items-center justify-center mr-2">
+                    <i class="ri-file-list-3-line"></i>
+                  </div>
+                  <span>View Offer Details</span>
+                </button>
+              </div>
+            </div>
+            <!-- Recent Activity Card -->
+            <div class="card p-6">
+              <div class="flex justify-between items-center mb-6">
+                <h2 class="text-lg font-semibold text-gray-800">
+                  Recent Activity
+                </h2>
+                <a href="#" class="text-primary text-sm">View All</a>
+              </div>
+              <div class="space-y-5">
+                <div class="activity-item">
+                  <div class="activity-dot"></div>
+                  <div class="mb-1">
+                    <span class="text-xs text-gray-500">Today, 10:30 AM</span>
+                  </div>
+                  <p class="text-sm text-gray-800">
+                    You've completed the onboarding process with
+                    <span class="font-medium">Microsoft</span>
+                  </p>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-dot"></div>
+                  <div class="mb-1">
+                    <span class="text-xs text-gray-500"
+                      >Yesterday, 2:15 PM</span
+                    >
+                  </div>
+                  <p class="text-sm text-gray-800">
+                    Signed the offer letter from
+                    <span class="font-medium">Microsoft</span>
+                  </p>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-dot"></div>
+                  <div class="mb-1">
+                    <span class="text-xs text-gray-500">April 15, 2025</span>
+                  </div>
+                  <p class="text-sm text-gray-800">
+                    Received job offer from
+                    <span class="font-medium">Microsoft</span> for Software
+                    Engineer position
+                  </p>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-dot"></div>
+                  <div class="mb-1">
+                    <span class="text-xs text-gray-500">April 10, 2025</span>
+                  </div>
+                  <p class="text-sm text-gray-800">
+                    Completed final round interview with
+                    <span class="font-medium">Microsoft</span>
+                  </p>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-dot"></div>
+                  <div class="mb-1">
+                    <span class="text-xs text-gray-500">April 5, 2025</span>
+                  </div>
+                  <p class="text-sm text-gray-800">
+                    Scheduled final interview with
+                    <span class="font-medium">Microsoft</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Second Row -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <!-- Upcoming Events Card -->
+            <div class="card p-6">
+              <div class="flex justify-between items-center mb-6">
+                <h2 class="text-lg font-semibold text-gray-800">
+                  Upcoming Events
+                </h2>
+                <a href="#" class="text-primary text-sm">View Calendar</a>
+              </div>
+              <div class="space-y-4">
+                <div class="flex items-start p-3 rounded-lg hover:bg-gray-50">
+                  <div
+                    class="w-12 h-12 rounded-lg bg-blue-100 flex flex-col items-center justify-center mr-4 flex-shrink-0"
+                  >
+                    <span class="text-primary text-xs font-medium">MAY</span>
+                    <span class="text-primary text-lg font-bold">10</span>
+                  </div>
+                  <div class="flex-grow">
+                    <h3 class="font-medium text-gray-800">
+                      Microsoft Onboarding Session
+                    </h3>
+                    <p class="text-sm text-gray-500 mb-1">
+                      10:00 AM - 12:00 PM
+                    </p>
+                    <div class="flex items-center text-sm text-gray-500">
+                      <div
+                        class="w-4 h-4 flex items-center justify-center mr-1"
+                      >
+                        <i class="ri-map-pin-line"></i>
+                      </div>
+                      <span>Virtual (Zoom)</span>
+                    </div>
+                  </div>
+                  <div class="flex-shrink-0">
+                    <label class="switch">
+                      <input type="checkbox" checked />
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="flex items-start p-3 rounded-lg hover:bg-gray-50">
+                  <div
+                    class="w-12 h-12 rounded-lg bg-blue-100 flex flex-col items-center justify-center mr-4 flex-shrink-0"
+                  >
+                    <span class="text-primary text-xs font-medium">MAY</span>
+                    <span class="text-primary text-lg font-bold">15</span>
+                  </div>
+                  <div class="flex-grow">
+                    <h3 class="font-medium text-gray-800">
+                      Document Verification
+                    </h3>
+                    <p class="text-sm text-gray-500 mb-1">2:00 PM - 3:00 PM</p>
+                    <div class="flex items-center text-sm text-gray-500">
+                      <div
+                        class="w-4 h-4 flex items-center justify-center mr-1"
+                      >
+                        <i class="ri-map-pin-line"></i>
+                      </div>
+                      <span>Placement Office, Room 302</span>
+                    </div>
+                  </div>
+                  <div class="flex-shrink-0">
+                    <label class="switch">
+                      <input type="checkbox" checked />
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="flex items-start p-3 rounded-lg hover:bg-gray-50">
+                  <div
+                    class="w-12 h-12 rounded-lg bg-blue-100 flex flex-col items-center justify-center mr-4 flex-shrink-0"
+                  >
+                    <span class="text-primary text-xs font-medium">MAY</span>
+                    <span class="text-primary text-lg font-bold">20</span>
+                  </div>
+                  <div class="flex-grow">
+                    <h3 class="font-medium text-gray-800">
+                      Pre-joining Formalities Workshop
+                    </h3>
+                    <p class="text-sm text-gray-500 mb-1">11:00 AM - 1:00 PM</p>
+                    <div class="flex items-center text-sm text-gray-500">
+                      <div
+                        class="w-4 h-4 flex items-center justify-center mr-1"
+                      >
+                        <i class="ri-map-pin-line"></i>
+                      </div>
+                      <span>Virtual (Teams)</span>
+                    </div>
+                  </div>
+                  <div class="flex-shrink-0">
+                    <label class="switch">
+                      <input type="checkbox" />
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Application Statistics Card -->
+            <div class="card p-6">
+              <div class="flex justify-between items-center mb-6">
+                <h2 class="text-lg font-semibold text-gray-800">
+                  Application Statistics
+                </h2>
+                <select
+                  class="text-sm text-gray-600 bg-transparent border-none cursor-pointer pr-8"
+                >
+                  <option>All Time</option>
+                  <option>This Month</option>
+                  <option>Last Month</option>
+                </select>
+              </div>
+              <div id="applicationChart" class="h-[250px]"></div>
+            </div>
+          </div>
+          <!-- Third Row -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+            <!-- Tasks Card -->
+            <div class="card p-6">
+              <div class="flex justify-between items-center mb-6">
+                <h2 class="text-lg font-semibold text-gray-800">
+                  Pending Tasks
+                </h2>
+                <a href="#" class="text-primary text-sm">View All</a>
+              </div>
+              <div class="space-y-3">
+                <div class="flex items-center p-3 rounded-lg hover:bg-gray-50">
+                  <input type="checkbox" class="mr-3" />
+                  <div>
+                    <p class="text-sm text-gray-800">
+                      Complete background verification form
+                    </p>
+                    <p class="text-xs text-gray-500">Due: May 12, 2025</p>
+                  </div>
+                </div>
+                <div class="flex items-center p-3 rounded-lg hover:bg-gray-50">
+                  <input type="checkbox" class="mr-3" />
+                  <div>
+                    <p class="text-sm text-gray-800">
+                      Submit original academic documents
+                    </p>
+                    <p class="text-xs text-gray-500">Due: May 15, 2025</p>
+                  </div>
+                </div>
+                <div class="flex items-center p-3 rounded-lg hover:bg-gray-50">
+                  <input type="checkbox" class="mr-3" checked />
+                  <div>
+                    <p class="text-sm text-gray-800 line-through">
+                      Sign and return offer letter
+                    </p>
+                    <p class="text-xs text-gray-500">
+                      Completed: April 17, 2025
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center p-3 rounded-lg hover:bg-gray-50">
+                  <input type="checkbox" class="mr-3" checked />
+                  <div>
+                    <p class="text-sm text-gray-800 line-through">
+                      Complete skill assessment
+                    </p>
+                    <p class="text-xs text-gray-500">
+                      Completed: April 12, 2025
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Resources Card -->
+            <div class="card p-6">
+              <div class="flex justify-between items-center mb-6">
+                <h2 class="text-lg font-semibold text-gray-800">Resources</h2>
+                <a href="#" class="text-primary text-sm">Browse All</a>
+              </div>
+              <div class="space-y-4">
+                <a
+                  href="#"
+                  class="flex items-center p-3 rounded-lg hover:bg-gray-50"
+                >
+                  <div
+                    class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mr-3 flex-shrink-0"
+                  >
+                    <div
+                      class="w-5 h-5 flex items-center justify-center text-primary"
+                    >
+                      <i class="ri-file-pdf-line"></i>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-medium text-gray-800">
+                      Microsoft Joining Guide
+                    </h3>
+                    <p class="text-xs text-gray-500">PDF • 2.3 MB</p>
+                  </div>
+                </a>
+                <a
+                  href="#"
+                  class="flex items-center p-3 rounded-lg hover:bg-gray-50"
+                >
+                  <div
+                    class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mr-3 flex-shrink-0"
+                  >
+                    <div
+                      class="w-5 h-5 flex items-center justify-center text-primary"
+                    >
+                      <i class="ri-vidicon-line"></i>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-medium text-gray-800">
+                      New Employee Orientation
+                    </h3>
+                    <p class="text-xs text-gray-500">Video • 45 min</p>
+                  </div>
+                </a>
+                <a
+                  href="#"
+                  class="flex items-center p-3 rounded-lg hover:bg-gray-50"
+                >
+                  <div
+                    class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mr-3 flex-shrink-0"
+                  >
+                    <div
+                      class="w-5 h-5 flex items-center justify-center text-primary"
+                    >
+                      <i class="ri-file-list-3-line"></i>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-medium text-gray-800">
+                      Required Documents Checklist
+                    </h3>
+                    <p class="text-xs text-gray-500">Document • 1 page</p>
+                  </div>
+                </a>
+                <a
+                  href="#"
+                  class="flex items-center p-3 rounded-lg hover:bg-gray-50"
+                >
+                  <div
+                    class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mr-3 flex-shrink-0"
+                  >
+                    <div
+                      class="w-5 h-5 flex items-center justify-center text-primary"
+                    >
+                      <i class="ri-links-line"></i>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-medium text-gray-800">
+                      Employee Benefits Portal
+                    </h3>
+                    <p class="text-xs text-gray-500">External Link</p>
+                  </div>
+                </a>
+              </div>
+            </div>
+            <!-- Announcements Card -->
+            <div class="card p-6">
+              <div class="flex justify-between items-center mb-6">
+                <h2 class="text-lg font-semibold text-gray-800">
+                  Announcements
+                </h2>
+                <a href="#" class="text-primary text-sm">View All</a>
+              </div>
+              <div class="space-y-4">
+                <div class="p-3 rounded-lg border border-blue-100 bg-blue-50">
+                  <div class="flex items-center mb-2">
+                    <div
+                      class="w-6 h-6 flex items-center justify-center text-primary mr-2"
+                    >
+                      <i class="ri-megaphone-line"></i>
+                    </div>
+                    <h3 class="text-sm font-medium text-gray-800">
+                      Pre-Placement Talk
+                    </h3>
+                  </div>
+                  <p class="text-xs text-gray-600 mb-2">
+                    Google is conducting a pre-placement talk on May 25th, 2025
+                    at 3:00 PM in the Main Auditorium.
+                  </p>
+                  <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-500"
+                      >Posted: May 1, 2025</span
+                    >
+                    <a href="#" class="text-xs text-primary">Register</a>
+                  </div>
+                </div>
+                <div class="p-3 rounded-lg border border-gray-100">
+                  <div class="flex items-center mb-2">
+                    <div
+                      class="w-6 h-6 flex items-center justify-center text-gray-600 mr-2"
+                    >
+                      <i class="ri-calendar-event-line"></i>
+                    </div>
+                    <h3 class="text-sm font-medium text-gray-800">
+                      Resume Workshop
+                    </h3>
+                  </div>
+                  <p class="text-xs text-gray-600 mb-2">
+                    Career Services is hosting a resume workshop on May 18th,
+                    2025 from 10:00 AM to 12:00 PM.
+                  </p>
+                  <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-500"
+                      >Posted: April 28, 2025</span
+                    >
+                    <a href="#" class="text-xs text-primary">RSVP</a>
+                  </div>
+                </div>
+                <div class="p-3 rounded-lg border border-gray-100">
+                  <div class="flex items-center mb-2">
+                    <div
+                      class="w-6 h-6 flex items-center justify-center text-gray-600 mr-2"
+                    >
+                      <i class="ri-information-line"></i>
+                    </div>
+                    <h3 class="text-sm font-medium text-gray-800">
+                      Placement Portal Update
+                    </h3>
+                  </div>
+                  <p class="text-xs text-gray-600 mb-2">
+                    The placement portal will be undergoing maintenance on May
+                    5th from 11:00 PM to 2:00 AM.
+                  </p>
+                  <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-500"
+                      >Posted: April 25, 2025</span
+                    >
+                    <a href="#" class="text-xs text-primary">Details</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </body>
+  <script src="./JavaScript/student.js"></script>
+</html>

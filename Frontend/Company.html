@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>College Placement Portal</title>
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#4F46E5",
+            secondary: "#818CF8",
+          },
+          borderRadius: {
+            none: "0px",
+            sm: "4px",
+            DEFAULT: "8px",
+            md: "12px",
+            lg: "16px",
+            xl: "20px",
+            "2xl": "24px",
+            "3xl": "32px",
+            full: "9999px",
+            button: "8px",
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet" />
+  <style>
+    :where([class^="ri-"])::before {
+      content: "\f3c2";
+    }
+
+    .sidebar {
+      background: linear-gradient(165deg, #4F46E5 0%, #6366F1 100%);
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+      transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .hover-scale {
+      transition: transform 0.2s;
+    }
+
+    .hover-scale:hover {
+      transform: scale(1.02);
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50">
+  <div class="flex h-screen">
+    <aside class="sidebar w-64 flex-shrink-0 text-white flex flex-col">
+      <div class="p-6">
+        <!-- <span class="text-2xl font-['Pacifico']">logo</span> -->
+         <img src="/Frontend/assets/logo-wide.png" alt="" class="h-16 mx-auto mb-5" >
+      </div>
+      <nav class="flex-1 px-4">
+        <div class="space-y-2">
+          <a href="#" class="flex items-center px-4 py-3 bg-white/10 rounded">
+            <div class="w-5 h-5 flex items-center justify-center">
+              <i class="ri-dashboard-line"></i>
+            </div>
+            <span class="ml-3">Dashboard</span>
+          </a>
+          <!-- <a href="#" class="flex items-center px-4 py-3 hover:bg-white/5 rounded">
+            <div class="w-5 h-5 flex items-center justify-center">
+              <i class="ri-briefcase-line"></i>
+            </div>
+            <span class="ml-3">Jobs</span>
+          </a> -->
+          <a href="#" class="flex items-center px-4 py-3 hover:bg-white/5 rounded">
+            <div class="w-5 h-5 flex items-center justify-center">
+              <i class="ri-file-list-line"></i>
+            </div>
+            <span class="ml-3">Applications</span>
+          </a>
+          <a href="#" class="flex items-center px-4 py-3 hover:bg-white/5 rounded">
+            <div class="w-5 h-5 flex items-center justify-center">
+              <i class="ri-group-line"></i>
+            </div>
+            <span class="ml-3">Students</span>
+          </a>
+          <!-- <a href="#" class="flex items-center px-4 py-3 hover:bg-white/5 rounded">
+            <div class="w-5 h-5 flex items-center justify-center">
+              <i class="ri-building-line"></i>
+            </div>
+            <span class="ml-3">Companies</span>
+          </a> -->
+          <a href="#" class="flex items-center px-4 py-3 hover:bg-white/5 rounded">
+            <div class="w-5 h-5 flex items-center justify-center">
+              <i class="ri-bar-chart-line"></i>
+            </div>
+            <span class="ml-3">Reports</span>
+          </a>
+        </div>
+      </nav>
+      <div class="p-4 border-t border-white/10">
+        <div class="flex items-center">
+          <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+            <i class="ri-user-line text-lg"></i>
+          </div>
+          <div class="ml-3">
+            <p class="font-medium">Alexander Mitchell</p>
+            <p class="text-sm text-white/70">Admin</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+    <main class="flex-1 flex flex-col overflow-hidden">
+      <header class="bg-white border-b flex items-center h-16 px-6">
+        <div class="flex-1 flex items-center">
+          <div class="relative w-96">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div class="w-5 h-5 flex items-center justify-center text-gray-400">
+                <i class="ri-search-line"></i>
+              </div>
+            </div>
+            <input type="text" class="w-full pl-10 pr-4 py-2 border-none bg-gray-50 rounded text-sm"
+              placeholder="Search for jobs, companies..." />
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button class="relative !rounded-button w-10 h-10 flex items-center justify-center hover:bg-gray-50">
+            <i class="ri-notification-line"></i>
+            <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+          </button>
+          <div class="flex items-center">
+            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+              <i class="ri-user-line"></i>
+            </div>
+          </div>
+        </div>
+      </header>
+      <div class="flex-1 overflow-auto p-6">
+        <div class="grid grid-cols-3 gap-6 mb-6">
+          <div class="stat-card bg-white rounded-xl shadow-lg shadow-indigo-100/25 p-6 border border-indigo-50">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-3xl font-semibold stat-number">246</p>
+                <p class="text-gray-600 mt-1">Total Jobs Posted</p>
+              </div>
+              <div class="w-10 h-10 flex items-center justify-center text-primary">
+                <i class="ri-briefcase-line text-xl"></i>
+              </div>
+            </div>
+            <div class="mt-4">
+              <div class="text-sm text-green-600 flex items-center">
+                <i class="ri-arrow-up-line mr-1"></i>
+                <span>12% from last month</span>
+              </div>
+            </div>
+          </div>
+          <div class="stat-card bg-white rounded-xl shadow-lg shadow-indigo-100/25 p-6 border border-indigo-50">
+            <div class="flex justify-between items-start">
+              <div>
+                <p
+                  class="text-3xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-indigo-400 stat-number">
+                  1,893
+                </p>
+                <p class="text-gray-600 mt-1">Active Applications</p>
+              </div>
+              <div class="w-10 h-10 flex items-center justify-center text-primary">
+                <i class="ri-file-list-line text-xl"></i>
+              </div>
+            </div>
+            <div class="mt-4">
+              <div class="text-sm text-green-600 flex items-center">
+                <i class="ri-arrow-up-line mr-1"></i>
+                <span>8% from last month</span>
+              </div>
+            </div>
+          </div>
+          <div class="stat-card bg-white rounded-xl shadow-lg shadow-indigo-100/25 p-6 border border-indigo-50">
+            <div class="flex justify-between items-start">
+              <div>
+                <p
+                  class="text-3xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-indigo-400">
+                  89
+                </p>
+                <p class="text-gray-600 mt-1">Scheduled Interviews</p>
+              </div>
+              <div class="w-10 h-10 flex items-center justify-center text-primary">
+                <i class="ri-calendar-line text-xl"></i>
+              </div>
+            </div>
+            <div class="mt-4">
+              <div class="text-sm text-red-600 flex items-center">
+                <i class="ri-arrow-down-line mr-1"></i>
+                <span>3% from last month</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-12 gap-6">
+          <div class="col-span-8">
+            <div class="bg-white rounded-xl shadow-lg shadow-indigo-100/25 p-6 border border-indigo-50 hover-scale">
+              <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold">Recent Job Posts</h2>
+                <button
+                  class="!rounded-button px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white hover:from-indigo-500 hover:to-indigo-400 transition-all duration-300 shadow-lg shadow-indigo-200/50 whitespace-nowrap">
+                  <i class="ri-add-line mr-1"></i>
+                  New Job Post
+                </button>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead>
+                    <tr class="border-b">
+                      <th class="text-left py-4 px-4 font-medium text-gray-600">
+                        Job Title
+                      </th>
+                      <th class="text-left py-4 px-4 font-medium text-gray-600">
+                        Company
+                      </th>
+                      <th class="text-left py-4 px-4 font-medium text-gray-600">
+                        Posted Date
+                      </th>
+                      <th class="text-left py-4 px-4 font-medium text-gray-600">
+                        Applications
+                      </th>
+                      <th class="text-left py-4 px-4 font-medium text-gray-600">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="border-b hover:bg-gray-50">
+                      <td class="py-4 px-4">Senior Software Engineer</td>
+                      <td class="py-4 px-4">Microsoft</td>
+                      <td class="py-4 px-4">Apr 28, 2025</td>
+                      <td class="py-4 px-4">42</td>
+                      <td class="py-4 px-4">
+                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">Active</span>
+                      </td>
+                    </tr>
+                    <tr class="border-b hover:bg-gray-50">
+                      <td class="py-4 px-4">Product Manager</td>
+                      <td class="py-4 px-4">Google</td>
+                      <td class="py-4 px-4">Apr 27, 2025</td>
+                      <td class="py-4 px-4">36</td>
+                      <td class="py-4 px-4">
+                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">Active</span>
+                      </td>
+                    </tr>
+                    <tr class="border-b hover:bg-gray-50">
+                      <td class="py-4 px-4">UX Designer</td>
+                      <td class="py-4 px-4">Apple</td>
+                      <td class="py-4 px-4">Apr 26, 2025</td>
+                      <td class="py-4 px-4">28</td>
+                      <td class="py-4 px-4">
+                        <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-sm">Closing Soon</span>
+                      </td>
+                    </tr>
+                    <tr class="border-b hover:bg-gray-50">
+                      <td class="py-4 px-4">Marketing Manager</td>
+                      <td class="py-4 px-4">Amazon</td>
+                      <td class="py-4 px-4">Apr 25, 2025</td>
+                      <td class="py-4 px-4">19</td>
+                      <td class="py-4 px-4">
+                        <span class="px-2 py-1 bg-red-100 text-red-800 rounded text-sm">Closed</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-span-4">
+            <div class="bg-white rounded-xl shadow-lg shadow-indigo-100/25 p-6 border border-indigo-50 hover-scale">
+              <h2
+                class="text-xl font-semibold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-indigo-400">
+                Post New Job
+              </h2>
+              <form id="jobPostForm" class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
+                  <input name="jobTitle" type="text"
+                    class="w-full px-3 py-2 border border-indigo-100 rounded-lg text-sm bg-gray-50/50 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 focus:outline-none transition-all"
+                    placeholder="e.g. Senior Software Engineer" />
+                </div>
+                <!-- <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+                  <input name="company" type="text" class="w-full px-3 py-2 border rounded text-sm" placeholder="e.g. Microsoft" />
+                </div> -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                  <input name="location" type="text" class="w-full px-3 py-2 border rounded text-sm" placeholder="e.g. New York, NY" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Employment Type</label>
+                  <div class="relative">
+                    <select name="jobType" class="w-full px-3 py-2 border rounded text-sm appearance-none pr-8">
+                      <option>Full-time</option>
+                      <option>Part-time</option>
+                      <option>Contract</option>
+                      <option>Internship</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                      <i class="ri-arrow-down-s-line text-gray-400"></i>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Vacancies</label>
+                  <input name="vacancies" type="number" class="w-full px-3 py-2 border rounded text-sm" placeholder="e.g. 5" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Salary Range</label>
+                  <input name="salary" type="text" class="w-full px-3 py-2 border rounded text-sm" placeholder="e.g. $80,000 - $120,000" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Eligibility</label>
+                  <input name="eligibility" type="text" class="w-full px-3 py-2 border rounded text-sm" placeholder="e.g. CGPA > 7.0" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Skills Required</label>
+                  <input name="skillsRequired" type="text" class="w-full px-3 py-2 border rounded text-sm" placeholder="e.g. JavaScript, React, MongoDB" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Application Deadline</label>
+                  <input name="deadline" type="date" class="w-full px-3 py-2 border rounded text-sm" />
+                </div>
+                <div class="pt-4 flex justify-between space-x-2">
+                  <button id="postJobBtn" type="submit"
+                    class="w-full py-2 bg-indigo-600 text-white rounded-button">
+                    Post Job
+                  </button>
+                  <button id="updateJobBtn" type="button" style="display: none;"
+                    class="w-full py-2 bg-yellow-500 text-white rounded-button">
+                    Update Job
+                  </button>
+                </div>                
+              </form>              
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <!-- Job Detail Modal -->
+<div id="jobDetailModal" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+  <div class="bg-white w-full max-w-xl p-6 rounded-xl shadow-lg relative">
+    <button id="closeJobModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl">
+      <i class="ri-close-line"></i>
+    </button>
+    <h2 class="text-2xl font-semibold text-indigo-600 mb-4">Job Details</h2>
+    <div class="space-y-2 text-sm text-gray-700">
+      <p><strong>Title:</strong> <span id="detailTitle"></span></p>
+      <p><strong>Type:</strong> <span id="detailType"></span></p>
+      <p><strong>Vacancies:</strong> <span id="detailVacancies"></span></p>
+      <p><strong>Salary:</strong> <span id="detailSalary"></span></p>
+      <p><strong>Location:</strong> <span id="detailLocation"></span></p>
+      <p><strong>Eligibility:</strong> <span id="detailEligibility"></span></p>
+      <p><strong>Skills:</strong> <span id="detailSkills"></span></p>
+      <p><strong>Description:</strong></p>
+      <p class="text-gray-600" id="detailDescription"></p>
+      <p><strong>Deadline:</strong> <span id="detailDeadline"></span></p>
+    </div>
+  </div>
+</div>
+</body>
+<script src="/Frontend/JavaScript/company.js"></script>
+
+</html>
