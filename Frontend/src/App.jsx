@@ -46,6 +46,7 @@ function App() {
             <Route path="register" element={<CompanyRegister />} />
             <Route path="post-job" element={<CompanyPostJob />} />
             <Route path="jobs" element={<CompanyJobs />} />
+            <Route path="jobs/edit/:id" element={<CompanyPostJob />} />
             <Route path="applicants" element={<ComingSoon title="Applicants" />} />
           </Route>
 

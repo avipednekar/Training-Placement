@@ -22,7 +22,16 @@ const Home = () => {
                     api.get('/stats/company-count').catch(() => ({ data: { count: 0 } }))
                 ]);
 
-                setJobs(jobsRes.data);
+                // Map backend snake_case to frontend camelCase
+                const formattedJobs = jobsRes.data.map(job => ({
+                    ...job,
+                    title: job.job_title,
+                    jobType: job.job_type,
+                    location: job.job_location,
+                    companyName: job.companyId?.name || "Company"
+                }));
+
+                setJobs(formattedJobs);
                 setStats(prev => ({
                     ...prev,
                     jobs: jobsRes.data.length,

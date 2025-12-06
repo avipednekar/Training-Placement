@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../../services/api';
 
 const CompanyJobs = () => {
@@ -11,19 +12,32 @@ const CompanyJobs = () => {
 
     const fetchJobs = async () => {
         try {
-            // Assuming endpoint exists for company to get their own jobs
             const response = await api.get('/jobs/my-jobs');
-            setJobs(response.data);
+            const formattedJobs = response.data.map(job => ({
+                ...job,
+                title: job.job_title,
+                postedDate: new Date(job.createdAt).toLocaleDateString(),
+                status: job.status || 'Active',
+                applications: job.applications || 0
+            }));
+            setJobs(formattedJobs);
         } catch (error) {
             console.error("Error fetching jobs:", error);
             // Fallback for demo if API isn't ready
-            setJobs([
-                { _id: '1', title: 'Senior Software Engineer', postedDate: '2025-04-28', status: 'Active', applications: 42 },
-                { _id: '2', title: 'Product Manager', postedDate: '2025-04-27', status: 'Active', applications: 36 },
-                { _id: '3', title: 'UX Designer', postedDate: '2025-04-26', status: 'Closing Soon', applications: 28 },
-            ]);
+            setJobs([]);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDelete = async (jobId) => {
+        if (!confirm('Are you sure you want to delete this job?')) return;
+        try {
+            await api.delete(`/jobs/${jobId}`);
+            setJobs(jobs.filter(job => job._id !== jobId));
+        } catch (error) {
+            console.error("Error deleting job:", error);
+            alert("Failed to delete job");
         }
     };
 
@@ -31,9 +45,11 @@ const CompanyJobs = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
             <div className="p-6 border-b border-gray-100 flex justify-between items-center">
                 <h2 className="text-xl font-bold text-gray-800">Manage Jobs</h2>
-                <button className="bg-primary text-white px-4 py-2 rounded text-sm hover:bg-blue-600">
-                    <i className="ri-add-line mr-1"></i> Post New Job
-                </button>
+                <Link to="/company/post-job">
+                    <button className="bg-primary text-white px-4 py-2 rounded text-sm hover:bg-blue-600">
+                        <i className="ri-add-line mr-1"></i> Post New Job
+                    </button>
+                </Link>
             </div>
 
             <div className="overflow-x-auto">
@@ -55,14 +71,14 @@ const CompanyJobs = () => {
                                 <td className="p-4 text-gray-600">{job.applications}</td>
                                 <td className="p-4">
                                     <span className={`px-2 py-1 rounded text-xs ${job.status === 'Active' ? 'bg-green-100 text-green-700' :
-                                            job.status === 'Closed' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
+                                        job.status === 'Closed' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
                                         }`}>
                                         {job.status}
                                     </span>
                                 </td>
                                 <td className="p-4">
-                                    <button className="text-blue-600 hover:text-blue-800 mr-3">Edit</button>
-                                    <button className="text-red-600 hover:text-red-800">Close</button>
+                                    <Link to={`/company/jobs/edit/${job._id}`} className="text-blue-600 hover:text-blue-800 mr-3">Edit</Link>
+                                    <button onClick={() => handleDelete(job._id)} className="text-red-600 hover:text-red-800">Delete</button>
                                 </td>
                             </tr>
                         ))}

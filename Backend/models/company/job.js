@@ -34,6 +34,15 @@ const jobSchema = new mongoose.Schema(
     deadline: {
       type: Date,
     },
+    status: {
+      type: String,
+      default: "Active",
+      enum: ["Active", "Closed", "Expired"],
+    },
+    applications: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );
