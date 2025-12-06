@@ -147,10 +147,18 @@ export const getJobById = async (req, res) => {
 
 export const getPublicJobs = async (req, res) => {
   try {
-    const jobs = await JobPost.find({ status: { $ne: "closed" } })
+    const limit = parseInt(req.query.limit) || 0; // 0 means no limit in Mongoose
+    let query = JobPost.find({ status: { $ne: "closed" } })
       .sort({ createdAt: -1 })
-      .limit(5)
       .populate("companyId", "name");
+
+    console.log("Fetching public jobs, limit:", limit);
+
+    if (limit > 0) {
+      query = query.limit(limit);
+    }
+
+    const jobs = await query;
     res.json(jobs);
   } catch (error) {
     console.error(error);

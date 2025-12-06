@@ -24,9 +24,9 @@ const Navbar = () => {
                     <Link to="/" className="text-primary font-medium hover:bg-blue-50 px-3 py-2 rounded-md transition-all">
                         Home
                     </Link>
-                    <a href="#jobs" className="text-gray-700 hover:text-primary hover:bg-blue-50 px-3 py-2 rounded-md transition-all">
+                    <Link to="/jobs" className="text-gray-700 hover:text-primary hover:bg-blue-50 px-3 py-2 rounded-md transition-all">
                         Jobs
-                    </a>
+                    </Link>
 
                     {user ? (
                         <>

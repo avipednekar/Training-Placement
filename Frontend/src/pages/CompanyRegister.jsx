@@ -92,7 +92,7 @@ const CompanyRegister = () => {
                     </p>
                 </div>
             </div>
-            <div className="hidden md:block w-1/2 bg-cover bg-center" style={{ backgroundImage: "url('https://placehold.co/800x1200/F0FDFA/0F766E?text=Hire+The+Best')" }}></div>
+            <div className="hidden md:block w-1/2 bg-cover bg-center" style={{ backgroundImage: "url('/assets/company-auth-new-bg.png')" }}></div>
         </div>
     );
 };

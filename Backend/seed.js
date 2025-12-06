@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { Company } from "./models/company/register.js";
 import { JobPost } from "./models/company/job.js";
+import { Student } from "./models/student/register.model.js";
 
 dotenv.config();
 
@@ -91,6 +92,27 @@ const seedDB = async () => {
         });
       }
       console.log(`  - Added 3 jobs for ${company.name}`);
+    }
+
+    // Seed a dummy student
+    const studentEmail = "student@demo.com";
+    let student = await Student.findOne({ email: studentEmail });
+    if (!student) {
+      student = await Student.create({
+        fullName: "Demo Student",
+        email: studentEmail,
+        password: "password123",
+        rollNo: "12345",
+        branch: "CSE",
+        cgpa: 8.5,
+        graduationYear: 2025,
+        phone: "9876543210",
+        programmingLanguages: ["Java", "Python", "JavaScript"],
+        certifications: ["AWS Cloud Practitioner", "React Developer"],
+      });
+      console.log(`Created Student: ${student.fullName}`);
+    } else {
+      console.log(`Student exists: ${student.fullName}`);
     }
 
     console.log("Database seeded successfully!");

@@ -14,7 +14,14 @@ const StudentJobs = () => {
     const fetchJobs = async () => {
         try {
             const response = await api.get('/jobs/public');
-            setJobs(response.data);
+            const formattedJobs = response.data.map(job => ({
+                ...job,
+                title: job.job_title,
+                jobType: job.job_type,
+                location: job.job_location,
+                companyName: job.companyId?.name || "Unknown Company"
+            }));
+            setJobs(formattedJobs);
         } catch (error) {
             console.error("Error fetching jobs:", error);
         } finally {

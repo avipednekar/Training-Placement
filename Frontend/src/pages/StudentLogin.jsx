@@ -113,7 +113,7 @@ const StudentLogin = () => {
             {/* Image Section */}
             <div
                 className="hidden md:block w-1/2 bg-cover bg-center"
-                style={{ backgroundImage: "url('https://placehold.co/800x1200/E0F2FE/0C4A6E?text=Student+Portal')" }}
+                style={{ backgroundImage: "url('/assets/student-auth-bg.png')" }}
             ></div>
         </div>
     );
