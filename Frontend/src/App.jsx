@@ -15,6 +15,7 @@ import CompanyJobs from './pages/company/CompanyJobs';
 import StudentJobApplication from './pages/student/StudentJobApplication';
 import StudentJobs from './pages/student/StudentJobs';
 import PublicJobs from './pages/PublicJobs';
+import JobDetails from './pages/JobDetails';
 
 // Placeholder components for routes we haven't built yet
 const ComingSoon = ({ title }) => (
@@ -30,6 +31,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/jobs" element={<PublicJobs />} />
+          <Route path="/jobs/:id" element={<JobDetails />} />
           <Route path="/student/login" element={<StudentLogin />} />
           <Route path="/student/register" element={<StudentRegister />} />
 

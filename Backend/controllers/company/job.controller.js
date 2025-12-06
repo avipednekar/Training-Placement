@@ -152,8 +152,6 @@ export const getPublicJobs = async (req, res) => {
       .sort({ createdAt: -1 })
       .populate("companyId", "name");
 
-    console.log("Fetching public jobs, limit:", limit);
-
     if (limit > 0) {
       query = query.limit(limit);
     }
