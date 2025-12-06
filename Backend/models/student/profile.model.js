@@ -4,13 +4,13 @@ const profileSchema = new mongoose.Schema(
   {
     student: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Student", 
+      ref: "Student",
     },
     imageUrl: {
-      type:String
+      type: String,
     },
     department: {
-      type:String
+      type: String,
     },
     cgpa: Number,
     backlogs: Number,
@@ -24,10 +24,13 @@ const profileSchema = new mongoose.Schema(
     linkedin: String,
     github: String,
     resume: {
-        type:String
+      type: String,
     },
+    certifications: [String],
+    graduationYear: String,
+    currentSemester: String,
   },
   { timestamps: true }
 );
 
-export const Profile = mongoose.model("Profile",profileSchema)
+export const Profile = mongoose.model("Profile", profileSchema);
