@@ -13,32 +13,8 @@ const JobDetails = () => {
     useEffect(() => {
         const fetchJobDetails = async () => {
             try {
-                // In a real app, you might have a specific API for getting a single job by ID publically
-                // For now, we can reuse getPublicJobs and find or implement getJobDetails in service
-                // Use the service method we defined (though strictly it needs a backend route, 
-                // but for now let's assume getPublicJobs returns list and we find it, OR we implement logic to fetch)
-                // Actually, our service implementation of getJobDetails calls `/jobs/public/:id`. 
-                // We need to ensure backend supports this or fallback.
-
-                // FALLBACK STRATEGY: Fetch all public jobs and find strictly for this demo if backend route missing
-                // Ideally backend should have router.get('/public/:id', ...)
-                // Let's rely on the service to handle it (which we defined to call /jobs/public/:id)
-                // If that fails (404), we might need to fallback to list filtering in service or here.
-
-                // Let's try service first implementation.
-                // NOTE: If backend doesn't list /public/:id, this will fail. 
-                // Let's update backend route quickly for robustness or change service. This is "Advanced" task.
-                // Assuming "Senior Dev" approach: We update backend. But I cannot easily update backend without more tool calls.
-                // Strategy: Fetch list and find.
-
-                const allJobs = await jobService.getPublicJobs();
-                const foundJob = allJobs.find(j => j.id === id || j._id === id);
-
-                if (foundJob) {
-                    setJob(foundJob);
-                } else {
-                    setError("Job not found");
-                }
+                const jobDetails = await jobService.getJobDetails(id);
+                setJob(jobDetails);
             } catch (err) {
                 console.error("Error loading job:", err);
                 setError("Failed to load job details");

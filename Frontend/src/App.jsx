@@ -16,6 +16,7 @@ import StudentJobApplication from './pages/student/StudentJobApplication';
 import StudentJobs from './pages/student/StudentJobs';
 import PublicJobs from './pages/PublicJobs';
 import JobDetails from './pages/JobDetails';
+import RequireAuth from './components/RequireAuth';
 
 // Placeholder components for routes we haven't built yet
 const ComingSoon = ({ title }) => (
@@ -36,7 +37,14 @@ function App() {
           <Route path="/student/register" element={<StudentRegister />} />
 
           {/* Student Routes */}
-          <Route path="/student" element={<StudentLayout />}>
+          <Route
+            path="/student"
+            element={
+              <RequireAuth role="student">
+                <StudentLayout />
+              </RequireAuth>
+            }
+          >
             <Route path="dashboard" element={<StudentOverview />} />
             <Route path="profile" element={<StudentProfile />} />
             <Route path="jobs" element={<StudentJobs />} />
@@ -45,7 +53,14 @@ function App() {
           </Route>
 
           {/* Company Routes */}
-          <Route path="/company" element={<CompanyLayout />}>
+          <Route
+            path="/company"
+            element={
+              <RequireAuth role="company">
+                <CompanyLayout />
+              </RequireAuth>
+            }
+          >
             <Route path="dashboard" element={<CompanyOverview />} />
             <Route path="post-job" element={<CompanyPostJob />} />
             <Route path="jobs" element={<CompanyJobs />} />

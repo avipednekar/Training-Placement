@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import Button from '../components/ui/Button';
+import TextField from '../components/ui/TextField';
+import SelectField from '../components/ui/SelectField';
+import { validateCompanyRegister } from '../utils/validation';
 
 const CompanyRegister = () => {
     const [formData, setFormData] = useState({
@@ -13,6 +17,7 @@ const CompanyRegister = () => {
         description: ''
     });
     const [error, setError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({});
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -23,12 +28,15 @@ const CompanyRegister = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (formData.password !== formData.confirmPassword) {
-            setError("Passwords do not match");
+
+        setError('');
+        setFieldErrors({});
+        const { isValid, errors } = validateCompanyRegister(formData);
+        if (!isValid) {
+            setFieldErrors(errors);
             return;
         }
 
-        setError('');
         setLoading(true);
 
         try {
@@ -67,24 +75,69 @@ const CompanyRegister = () => {
                     {success && <div className="mb-6 p-4 rounded bg-green-50 text-green-600 text-center">{success}</div>}
 
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <input name="companyName" placeholder="Company Name" required className="w-full p-4 border rounded focus:ring-2 focus:ring-primary outline-none" onChange={handleChange} />
-                        <input name="email" type="email" placeholder="Work Email" required className="w-full p-4 border rounded focus:ring-2 focus:ring-primary outline-none" onChange={handleChange} />
+                        <TextField
+                            name="companyName"
+                            placeholder="Company Name"
+                            value={formData.companyName}
+                            onChange={handleChange}
+                            error={fieldErrors.companyName}
+                        />
+                        <TextField
+                            name="email"
+                            type="email"
+                            placeholder="Work Email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            error={fieldErrors.email}
+                        />
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <input name="website" placeholder="Website" className="w-full p-4 border rounded focus:ring-2 focus:ring-primary outline-none" onChange={handleChange} />
-                            <input name="location" placeholder="Location" required className="w-full p-4 border rounded focus:ring-2 focus:ring-primary outline-none" onChange={handleChange} />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <TextField
+                                name="website"
+                                placeholder="Website"
+                                value={formData.website}
+                                onChange={handleChange}
+                            />
+                            <TextField
+                                name="location"
+                                placeholder="Location"
+                                value={formData.location}
+                                onChange={handleChange}
+                                error={fieldErrors.location}
+                            />
                         </div>
 
-                        <textarea name="description" placeholder="About Company" rows="3" className="w-full p-4 border rounded focus:ring-2 focus:ring-primary outline-none" onChange={handleChange}></textarea>
+                        <textarea
+                            name="description"
+                            placeholder="About Company"
+                            rows="3"
+                            className="w-full p-4 border rounded focus:ring-2 focus:ring-primary outline-none"
+                            value={formData.description}
+                            onChange={handleChange}
+                        ></textarea>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <input name="password" type="password" placeholder="Password" required className="w-full p-4 border rounded focus:ring-2 focus:ring-primary outline-none" onChange={handleChange} />
-                            <input name="confirmPassword" type="password" placeholder="Confirm Password" required className="w-full p-4 border rounded focus:ring-2 focus:ring-primary outline-none" onChange={handleChange} />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <TextField
+                                name="password"
+                                type="password"
+                                placeholder="Password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                error={fieldErrors.password}
+                            />
+                            <TextField
+                                name="confirmPassword"
+                                type="password"
+                                placeholder="Confirm Password"
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                error={fieldErrors.confirmPassword}
+                            />
                         </div>
 
-                        <button type="submit" disabled={loading} className="w-full bg-primary text-white py-4 rounded font-medium hover:bg-blue-600 transition-colors disabled:opacity-70">
-                            {loading ? 'Registering...' : 'Create Account'}
-                        </button>
+                        <Button type="submit" loading={loading} fullWidth>
+                            Create Account
+                        </Button>
                     </form>
 
                     <p className="text-center mt-6 text-gray-500">

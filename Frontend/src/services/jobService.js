@@ -29,20 +29,7 @@ const jobService = {
    */
   getJobDetails: async (id) => {
     try {
-      // Assuming backend route will be created for single public job
-      // For now, using public list logic or dedicated route if exists
-      // Current backend route: router.route('/jobs/:id').get(getJobById); (Auth required usually?)
-      // We need a public route. For now reusing public jobs list if specific ID fetch isn't public.
-      // Wait, standard getJobById might be public or protected.
-      // Let's assume we maintain /jobs/public/:id or similar in future.
-      // For this implementation, we might need to filter from list if no direct route.
-      // But better: use the existing /jobs/public endpoint and filter if needed,
-      // OR update backend to allow public access to single job.
-
-      // Temporary strategy: Fetch all public and find.
-      // Ideally: Update backend.
-
-      const response = await api.get(`/jobs/public/${id}`); // We will need to implement this backend route
+      const response = await api.get(`/jobs/public/${id}`);
       return formatJobData(response.data);
     } catch (error) {
       console.error("Error fetching job details:", error);

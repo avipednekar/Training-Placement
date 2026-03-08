@@ -8,17 +8,30 @@ import {
   getJobCount,
   getPublicJobs,
   getMyJobs,
+  getPublicJobById,
 } from "../controllers/company/job.controller.js";
+import {
+  requireCompany,
+  requireStudent,
+} from "../middlewares/auth.middleware.js";
 
 const jobRouter = Router();
 
+// Public job endpoints
 jobRouter.route("/count").get(getJobCount);
 jobRouter.route("/public").get(getPublicJobs);
-jobRouter.route("/apply").post(applyJob);
-jobRouter.route("/my-jobs").get(getMyJobs);
-jobRouter.route("/company/:companyId").get(getCompanyJobs); // Corresponds to /company-jobs/:companyId
+jobRouter.route("/public/:id").get(getPublicJobById);
 jobRouter.route("/:id").get(getJobById);
-jobRouter.route("/").post(createOrUpdateJob);
-jobRouter.route("/:jobId").delete(deleteJob);
+
+// Student-protected endpoint
+jobRouter.route("/apply").post(requireStudent, applyJob);
+
+// Company-protected endpoints
+jobRouter.route("/my-jobs").get(requireCompany, getMyJobs);
+jobRouter
+  .route("/company/:companyId")
+  .get(requireCompany, getCompanyJobs); // Corresponds to /company-jobs/:companyId
+jobRouter.route("/").post(requireCompany, createOrUpdateJob);
+jobRouter.route("/:jobId").delete(requireCompany, deleteJob);
 
 export default jobRouter;

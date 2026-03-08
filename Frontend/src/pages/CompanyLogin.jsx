@@ -2,11 +2,15 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import Button from '../components/ui/Button';
+import TextField from '../components/ui/TextField';
+import { validateCompanyLogin } from '../utils/validation';
 
 const CompanyLogin = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
@@ -14,9 +18,17 @@ const CompanyLogin = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setFieldErrors({});
         setLoading(true);
 
         try {
+            const { isValid, errors } = validateCompanyLogin({ email, password });
+            if (!isValid) {
+                setFieldErrors(errors);
+                setLoading(false);
+                return;
+            }
+
             const response = await api.post('/company/login', { email, password });
             const { loggedIncompany, accessToken } = response.data;
 
@@ -54,30 +66,26 @@ const CompanyLogin = () => {
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        <input
+                        <TextField
+                            name="email"
                             type="email"
-                            required
-                            className="w-full p-4 border border-gray-200 rounded text-gray-700 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
                             placeholder="Company Email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            error={fieldErrors.email}
                         />
-                        <input
+                        <TextField
+                            name="password"
                             type="password"
-                            required
-                            className="w-full p-4 border border-gray-200 rounded text-gray-700 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
                             placeholder="Password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            error={fieldErrors.password}
                         />
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full bg-primary text-white py-4 rounded-button font-medium text-lg hover:bg-blue-600 transition-colors disabled:opacity-70"
-                        >
-                            {loading ? 'Logging in...' : 'Log in'}
-                        </button>
+                        <Button type="submit" loading={loading} fullWidth>
+                            Log in
+                        </Button>
 
                         <div className="text-center mt-6">
                             <p className="text-gray-500 text-sm">

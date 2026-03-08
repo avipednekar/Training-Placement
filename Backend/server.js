@@ -9,6 +9,7 @@ import comRouter from "./routes/company.route.js";
 import studRouter from "./routes/student.route.js";
 import jobRouter from "./routes/job.route.js";
 import statsRouter from "./routes/stats.route.js";
+import { errorHandler } from "./middlewares/errorHandler.middleware.js";
 
 const app = express();
 
@@ -32,6 +33,9 @@ app.use("/api/company", comRouter);
 app.use("/api/student", studRouter);
 app.use("/api/jobs", jobRouter);
 app.use("/api/stats", statsRouter);
+
+// Centralized error handler
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

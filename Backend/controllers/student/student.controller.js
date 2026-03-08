@@ -149,7 +149,13 @@ const studProfile = asyncHandler(async (req, res) => {
 
 const getProfileByEmail = async (req, res) => {
   try {
-    const student = await Student.findOne({ email: req.params.email });
+    const email = req.params.email || req.student?.email;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const student = await Student.findOne({ email });
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
@@ -169,9 +175,13 @@ const getProfileByEmail = async (req, res) => {
 
 const getStudentByEmail = async (req, res) => {
   try {
-    const student = await Student.findOne({ email: req.params.email }).select(
-      "-password"
-    );
+    const email = req.params.email || req.student?.email;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const student = await Student.findOne({ email }).select("-password");
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }

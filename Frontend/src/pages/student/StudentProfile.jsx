@@ -28,12 +28,13 @@ const StudentProfile = () => {
 
     useEffect(() => {
         fetchProfile();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const fetchProfile = async () => {
         try {
-            // Fetch Profile Data (Skills, etc.)
-            const profileRes = await api.get(`/student/profile/${user.email}`);
+            // Fetch Profile Data (Skills, etc.) for the authenticated student
+            const profileRes = await api.get('/student/me/profile');
             if (profileRes.data) {
                 const data = profileRes.data;
                 setFormData({
@@ -49,8 +50,8 @@ const StudentProfile = () => {
                 });
             }
 
-            // Fetch Student Info (Name, RollNo, etc.)
-            const studentRes = await api.get(`/student/info/${user.email}`);
+            // Fetch Student Info (Name, RollNo, etc.) for the authenticated student
+            const studentRes = await api.get('/student/me');
             if (studentRes.data) {
                 setStudentName(studentRes.data.fullName);
             }

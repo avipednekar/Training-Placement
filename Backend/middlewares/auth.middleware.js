@@ -1,43 +1,118 @@
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 import { Student } from "../models/student/register.model.js";
+import { Company } from "../models/company/register.js";
 
-const verifyJWT = async (req,res,next)=>{
-    try {
-        const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","");
-        // console.log(token)
-    
-        if(!token){
-            return res 
-            .status(401)
-            .json(
-                400,
-                "Token invalid"
-            )
-        }
-    
-        const decodeToken = jwt.verify(token,process.env.ACCESS_TOKEN_SECRET)
-    
-        const student=await Student.findById(decodeToken?._id).select("-password -refreshToken")
-    
-        if (!student) {
-            return res
-            .status(401)
-            .json(
-                401,
-                "invalid access token"
-            )
-        }
-    
-        req.student=student;
-        next()
-    } catch (error) {
-        return res
-        .status(400)
-        .json(
-            400,
-            error?.message || "Invalid token access"
-        )
+const getTokenFromRequest = (req) => {
+  const authHeader = req.header("Authorization");
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    return authHeader.replace("Bearer ", "");
+  }
+
+  // Fallback to cookie for legacy student login flow
+  if (req.cookies?.accessToken) {
+    return req.cookies.accessToken;
+  }
+
+  return null;
+};
+
+const sendAuthError = (res, code, message, statusCode = 401) => {
+  return res.status(statusCode).json({
+    success: false,
+    message,
+    error: {
+      code,
+      message,
+    },
+  });
+};
+
+const verifyAccessToken = (req, res) => {
+  const token = getTokenFromRequest(req);
+
+  if (!token) {
+    throw {
+      statusCode: 401,
+      code: "AUTH_REQUIRED",
+      message: "Authentication token is missing",
+    };
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    return decoded;
+  } catch (error) {
+    throw {
+      statusCode: 401,
+      code: "INVALID_TOKEN",
+      message: "Invalid or expired authentication token",
+    };
+  }
+};
+
+// Student-specific auth guard (backwards-compatible name)
+const verifyJWT = async (req, res, next) => {
+  try {
+    const decoded = verifyAccessToken(req, res);
+
+    const student = await Student.findById(decoded?._id).select(
+      "-password -refreshToken"
+    );
+
+    if (!student) {
+      return sendAuthError(res, "STUDENT_NOT_FOUND", "Student not found");
     }
-}
 
-export {verifyJWT}
+    req.student = student;
+    req.auth = {
+      userId: String(student._id),
+      role: "student",
+      email: student.email,
+    };
+
+    next();
+  } catch (err) {
+    return sendAuthError(
+      res,
+      err.code || "AUTH_ERROR",
+      err.message || "Authentication failed",
+      err.statusCode || 401
+    );
+  }
+};
+
+// Explicit student guard for clarity in new routes
+const requireStudent = verifyJWT;
+
+// Company-specific auth guard
+const requireCompany = async (req, res, next) => {
+  try {
+    const decoded = verifyAccessToken(req, res);
+
+    const company = await Company.findById(decoded?._id).select(
+      "-password -refreshToken"
+    );
+
+    if (!company) {
+      return sendAuthError(res, "COMPANY_NOT_FOUND", "Company not found");
+    }
+
+    req.company = company;
+    req.auth = {
+      userId: String(company._id),
+      role: "company",
+      email: company.email,
+    };
+
+    next();
+  } catch (err) {
+    return sendAuthError(
+      res,
+      err.code || "AUTH_ERROR",
+      err.message || "Authentication failed",
+      err.statusCode || 401
+    );
+  }
+};
+
+export { verifyJWT, requireStudent, requireCompany };

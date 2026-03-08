@@ -2,11 +2,15 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import Button from '../components/ui/Button';
+import TextField from '../components/ui/TextField';
+import { validateStudentLogin } from '../utils/validation';
 
 const StudentLogin = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
@@ -14,9 +18,17 @@ const StudentLogin = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setFieldErrors({});
         setLoading(true);
 
         try {
+            const { isValid, errors } = validateStudentLogin({ email, password });
+            if (!isValid) {
+                setFieldErrors(errors);
+                setLoading(false);
+                return;
+            }
+
             const response = await api.post('/student/login', { email, password });
             const { loggedInuser, accessToken } = response.data;
 
@@ -56,33 +68,25 @@ const StudentLogin = () => {
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                                <i className="ri-mail-line text-gray-400 text-xl"></i>
-                            </div>
-                            <input
-                                type="email"
-                                required
-                                className="w-full pl-12 pr-4 py-4 border border-gray-200 rounded text-gray-700 text-base focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
-                                placeholder="College Email (e.g., student@college.edu)"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
-                        </div>
+                        <TextField
+                            name="email"
+                            type="email"
+                            placeholder="College Email (e.g., student@college.edu)"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            leftIcon="ri-mail-line"
+                            error={fieldErrors.email}
+                        />
 
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                                <i className="ri-lock-line text-gray-400 text-xl"></i>
-                            </div>
-                            <input
-                                type="password"
-                                required
-                                className="w-full pl-12 pr-4 py-4 border border-gray-200 rounded text-gray-700 text-base focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
-                                placeholder="Password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                        </div>
+                        <TextField
+                            name="password"
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            leftIcon="ri-lock-line"
+                            error={fieldErrors.password}
+                        />
 
                         <div className="flex justify-end">
                             <a href="#" className="text-sm text-primary hover:text-primary/80 transition-colors">
@@ -90,13 +94,9 @@ const StudentLogin = () => {
                             </a>
                         </div>
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full bg-primary text-white py-4 rounded-button font-medium text-lg hover:bg-blue-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
-                        >
-                            {loading ? 'Logging in...' : 'Log in'}
-                        </button>
+                        <Button type="submit" loading={loading} fullWidth>
+                            Log in
+                        </Button>
 
                         <div className="text-center mt-6">
                             <p className="text-gray-500 text-sm">

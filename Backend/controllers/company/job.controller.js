@@ -1,18 +1,18 @@
-import { JobPost } from "../../models/company/job.js";
-import { CompanyStats } from "../../models/company/stats.js";
-import { Student } from "../../models/student/register.model.js";
-import jwt from "jsonwebtoken";
+import {
+  getCompanyJobsForId,
+  createOrUpdateCompanyJob,
+  deleteCompanyJob,
+  findJobById,
+  findPublicJobById,
+  getPublicJobsList,
+  getActiveJobCount,
+  applyForJob as applyForJobService,
+} from "../../services/job.service.js";
 
 export const getCompanyJobs = async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) return res.status(401).json({ message: "Unauthorized" });
-
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-
-    const jobs = await JobPost.find({ companyId: req.params.companyId }).sort({
-      createdAt: -1,
-    });
+    const companyId = req.params.companyId || req.company?._id;
+    const jobs = await getCompanyJobsForId(companyId);
 
     res.json(jobs);
   } catch (error) {
@@ -23,13 +23,8 @@ export const getCompanyJobs = async (req, res) => {
 
 export const getMyJobs = async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) return res.status(401).json({ message: "Unauthorized" });
-
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const companyId = decoded._id;
-
-    const jobs = await JobPost.find({ companyId }).sort({ createdAt: -1 });
+    const companyId = req.company?._id;
+    const jobs = await getCompanyJobsForId(companyId);
     res.json(jobs);
   } catch (error) {
     console.error(error);
@@ -39,71 +34,23 @@ export const getMyJobs = async (req, res) => {
 
 export const createOrUpdateJob = async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) return res.status(401).json({ message: "Unauthorized" });
-
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const companyId = decoded._id;
-
-    const {
-      _id,
-      job_title,
-      job_type,
-      vacancy,
-      salary,
-      job_des,
-      skills,
-      criteria,
-      job_location,
-      deadline,
-    } = req.body;
-
-    const jobData = {
-      job_title: job_title,
-      job_type: job_type,
-      vacancy: vacancy,
-      salary: salary,
-      job_des: job_des,
-      skills: skills,
-      criteria: criteria,
-      job_location: job_location,
-      deadline: deadline,
+    const companyId = req.company?._id;
+    const { job, isUpdate } = await createOrUpdateCompanyJob(
       companyId,
-      updatedAt: new Date(),
-    };
+      req.body
+    );
 
-    if (_id) {
-      const updatedJob = await JobPost.findOneAndUpdate(
-        { _id, companyId },
-        { $set: jobData },
-        { new: true }
-      );
-      if (!updatedJob)
-        return res.status(404).json({ message: "Job not found" });
-
-      res.json({ message: "Job updated successfully", job: updatedJob });
-    } else {
-      const newJob = new JobPost({
-        ...jobData,
-        createdAt: new Date(),
-        applications: 0,
-      });
-
-      await newJob.save();
-
-      await CompanyStats.findOneAndUpdate(
-        { companyId },
-        {
-          $inc: { totalJobsPosted: 1, activeJobs: 1 },
-          $set: { lastUpdated: new Date() },
-        },
-        { upsert: true, new: true }
-      );
-
-      res
-        .status(201)
-        .json({ message: "Job created successfully", job: newJob });
+    if (!job) {
+      return res.status(404).json({ message: "Job not found" });
     }
+
+    if (isUpdate) {
+      return res.json({ message: "Job updated successfully", job });
+    }
+
+    return res
+      .status(201)
+      .json({ message: "Job created successfully", job });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error processing job" });
@@ -112,20 +59,8 @@ export const createOrUpdateJob = async (req, res) => {
 
 export const deleteJob = async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) return res.status(401).json({ message: "Unauthorized" });
-
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-
-    await JobPost.findByIdAndDelete(req.params.jobId);
-
-    await CompanyStats.findOneAndUpdate(
-      { companyId: decoded._id },
-      {
-        $inc: { activeJobs: -1 },
-        $set: { lastUpdated: new Date() },
-      }
-    );
+    const companyId = req.company?._id;
+    await deleteCompanyJob(companyId, req.params.jobId);
 
     res.json({ message: "Job deleted successfully" });
   } catch (error) {
@@ -136,7 +71,18 @@ export const deleteJob = async (req, res) => {
 
 export const getJobById = async (req, res) => {
   try {
-    const job = await JobPost.findById(req.params.id);
+    const job = await findJobById(req.params.id);
+    if (!job) return res.status(404).json({ message: "Job not found" });
+    res.json(job);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error fetching job" });
+  }
+};
+
+export const getPublicJobById = async (req, res) => {
+  try {
+    const job = await findPublicJobById(req.params.id);
     if (!job) return res.status(404).json({ message: "Job not found" });
     res.json(job);
   } catch (err) {
@@ -148,15 +94,7 @@ export const getJobById = async (req, res) => {
 export const getPublicJobs = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 0; // 0 means no limit in Mongoose
-    let query = JobPost.find({ status: { $ne: "closed" } })
-      .sort({ createdAt: -1 })
-      .populate("companyId", "name");
-
-    if (limit > 0) {
-      query = query.limit(limit);
-    }
-
-    const jobs = await query;
+    const jobs = await getPublicJobsList(limit);
     res.json(jobs);
   } catch (error) {
     console.error(error);
@@ -166,7 +104,7 @@ export const getPublicJobs = async (req, res) => {
 
 export const getJobCount = async (req, res) => {
   try {
-    const count = await JobPost.countDocuments({ status: { $ne: "closed" } });
+    const count = await getActiveJobCount();
     res.json({ count });
   } catch (error) {
     console.error(error);
@@ -176,32 +114,9 @@ export const getJobCount = async (req, res) => {
 
 export const applyJob = async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) return res.status(401).json({ message: "Unauthorized" });
-
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const studentId = decoded._id;
-
+    const studentId = req.student?._id;
     const { jobId } = req.body;
-
-    // Get student profile
-    const student = await Student.findById(studentId);
-    if (!student) {
-      return res.status(404).json({ message: "Student not found" });
-    }
-
-    // Get job details
-    const job = await JobPost.findById(jobId);
-    if (!job) {
-      return res.status(404).json({ message: "Job not found" });
-    }
-
-    // Update job applications count
-    const updatedJob = await JobPost.findOneAndUpdate(
-      { _id: jobId },
-      { $inc: { applications: 1 } },
-      { new: true }
-    );
+    const updatedJob = await applyForJobService(studentId, jobId);
 
     res.json({
       message: "Application submitted successfully",

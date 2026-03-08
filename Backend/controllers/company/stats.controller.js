@@ -1,17 +1,10 @@
-import { CompanyStats } from "../../models/company/stats.js";
 import { JobPost } from "../../models/company/job.js";
-import { Company } from "../../models/company/register.js";
-import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import { getCompanyCount as getCompanyCountService } from "../../services/company.service.js";
 
 export const getCompanyStats = async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) return res.status(401).json({ message: "Unauthorized" });
-
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-
-    const companyId = req.params.companyId;
+    const companyId = req.params.companyId || req.company?._id;
 
     const activeJobs = await JobPost.countDocuments({
       companyId,
@@ -39,7 +32,7 @@ export const getCompanyStats = async (req, res) => {
 
 export const getCompanyCount = async (req, res) => {
   try {
-    const count = await Company.countDocuments();
+    const count = await getCompanyCountService();
     res.json({ count });
   } catch (error) {
     console.error(error);

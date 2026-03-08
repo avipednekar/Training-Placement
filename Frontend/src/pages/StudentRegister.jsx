@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import Button from '../components/ui/Button';
+import TextField from '../components/ui/TextField';
+import SelectField from '../components/ui/SelectField';
+import { validateStudentRegister } from '../utils/validation';
 
 const StudentRegister = () => {
     const [formData, setFormData] = useState({
@@ -12,6 +16,7 @@ const StudentRegister = () => {
         confirmPassword: ''
     });
     const [error, setError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({});
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -22,12 +27,15 @@ const StudentRegister = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (formData.password !== formData.confirmPassword) {
-            setError("Passwords do not match");
+
+        setError('');
+        setFieldErrors({});
+        const { isValid, errors } = validateStudentRegister(formData);
+        if (!isValid) {
+            setFieldErrors(errors);
             return;
         }
 
-        setError('');
         setLoading(true);
 
         try {
@@ -64,24 +72,62 @@ const StudentRegister = () => {
                     {success && <div className="mb-6 p-4 rounded bg-green-50 text-green-600 text-center">{success}</div>}
 
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <input name="fullName" placeholder="Full Name" required className="w-full p-4 border rounded focus:ring-2 focus:ring-primary outline-none" onChange={handleChange} />
-                        <input name="email" type="email" placeholder="Email Address" required className="w-full p-4 border rounded focus:ring-2 focus:ring-primary outline-none" onChange={handleChange} />
-                        <div className="grid grid-cols-2 gap-4">
-                            <input name="rollNo" placeholder="Roll Number" required className="w-full p-4 border rounded focus:ring-2 focus:ring-primary outline-none" onChange={handleChange} />
-                            <select name="branch" required className="w-full p-4 border rounded focus:ring-2 focus:ring-primary outline-none bg-white" onChange={handleChange}>
+                        <TextField
+                            name="fullName"
+                            placeholder="Full Name"
+                            value={formData.fullName}
+                            onChange={handleChange}
+                            error={fieldErrors.fullName}
+                        />
+                        <TextField
+                            name="email"
+                            type="email"
+                            placeholder="Email Address"
+                            value={formData.email}
+                            onChange={handleChange}
+                            error={fieldErrors.email}
+                        />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <TextField
+                                name="rollNo"
+                                placeholder="Roll Number"
+                                value={formData.rollNo}
+                                onChange={handleChange}
+                                error={fieldErrors.rollNo}
+                            />
+                            <SelectField
+                                name="branch"
+                                value={formData.branch}
+                                onChange={handleChange}
+                                error={fieldErrors.branch}
+                            >
                                 <option value="">Select Branch</option>
                                 <option value="CSE">CSE</option>
                                 <option value="IT">IT</option>
                                 <option value="ECE">ECE</option>
                                 <option value="MECH">MECH</option>
-                            </select>
+                            </SelectField>
                         </div>
-                        <input name="password" type="password" placeholder="Password" required className="w-full p-4 border rounded focus:ring-2 focus:ring-primary outline-none" onChange={handleChange} />
-                        <input name="confirmPassword" type="password" placeholder="Confirm Password" required className="w-full p-4 border rounded focus:ring-2 focus:ring-primary outline-none" onChange={handleChange} />
+                        <TextField
+                            name="password"
+                            type="password"
+                            placeholder="Password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            error={fieldErrors.password}
+                        />
+                        <TextField
+                            name="confirmPassword"
+                            type="password"
+                            placeholder="Confirm Password"
+                            value={formData.confirmPassword}
+                            onChange={handleChange}
+                            error={fieldErrors.confirmPassword}
+                        />
 
-                        <button type="submit" disabled={loading} className="w-full bg-primary text-white py-4 rounded font-medium hover:bg-blue-600 transition-colors disabled:opacity-70">
-                            {loading ? 'Creating Account...' : 'Register'}
-                        </button>
+                        <Button type="submit" loading={loading} fullWidth>
+                            Register
+                        </Button>
                     </form>
 
                     <p className="text-center mt-6 text-gray-500">
