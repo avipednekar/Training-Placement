@@ -256,13 +256,13 @@ export const findJobById = async (jobId) => {
 };
 
 export const findPublicJobById = async (jobId) => {
-  return JobPost.findById(jobId).populate("companyId", "name").lean();
+  return JobPost.findById(jobId).populate("companyId", "name logoUrl").lean();
 };
 
 export const getPublicJobsList = async (limit = 0) => {
   let query = JobPost.find({ status: { $ne: "Closed" } })
     .sort({ createdAt: -1 })
-    .populate("companyId", "name");
+    .populate("companyId", "name logoUrl");
 
   if (limit > 0) {
     query = query.limit(limit);
@@ -389,7 +389,7 @@ export const getEligibleJobsForStudent = async (studentId) => {
   const profile = await Profile.findOne({ student: studentId }).lean();
   const jobs = await JobPost.find({ status: { $ne: "Closed" } })
     .sort({ createdAt: -1 })
-    .populate("companyId", "name")
+    .populate("companyId", "name logoUrl")
     .lean();
 
   const eligibleJobs = jobs
@@ -404,6 +404,7 @@ export const getEligibleJobsForStudent = async (studentId) => {
         salary: job.salary,
         deadline: job.deadline,
         companyName: job.companyId?.name || "Unknown Company",
+        companyLogo: job.companyId?.logoUrl || "",
         criteria: job.criteria,
         skills: sanitizeStringList(job.skills, toTitleCase),
         matchedSkills: evaluation.matchedSkills,

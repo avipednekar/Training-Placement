@@ -21,6 +21,10 @@ const companySchema = new mongoose.Schema(
     domain: {
       type: String,
     },
+    logoUrl: {
+      type: String,
+      default: "",
+    },
     password: {
       type: String,
     },

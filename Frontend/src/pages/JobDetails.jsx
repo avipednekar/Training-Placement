@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import CompanyLogo from '../components/ui/CompanyLogo';
 import jobService from '../services/jobService';
 
 const JobDetails = () => {
@@ -59,7 +60,16 @@ const JobDetails = () => {
                         {/* Header */}
                         <div className="p-8 border-b border-gray-100 bg-gray-50/50">
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                                <div>
+                                <div className="flex items-start gap-4">
+                                    <CompanyLogo
+                                        companyName={job.companyName}
+                                        logoUrl={job.companyLogo}
+                                        sizeClass="w-16 h-16"
+                                        roundedClass="rounded-2xl"
+                                        textClass="text-2xl"
+                                        imagePaddingClass="p-3"
+                                    />
+                                    <div>
                                     <h1 className="text-3xl font-bold text-gray-900 mb-2">{job.title}</h1>
                                     <div className="flex items-center gap-3 text-gray-600">
                                         <span className="font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full text-sm">
@@ -72,6 +82,7 @@ const JobDetails = () => {
                                             <i className="ri-time-line mr-1"></i> Posted {new Date(job.postedAt).toLocaleDateString()}
                                         </span>
                                     </div>
+                                </div>
                                 </div>
                                 <div className="flex flex-col gap-2 min-w-[150px]">
                                     <div className="text-right hidden md:block">

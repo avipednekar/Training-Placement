@@ -19,7 +19,7 @@ const generateAccessAndRefreshTokens = async (companyId) => {
 
 const comRegister = async (req, res) => {
   try {
-    const { name, address, domain, email, password } = req.body;
+    const { name, address, domain, logoUrl, email, password } = req.body;
 
     const existingCompany = await Company.findOne({ email: email });
 
@@ -31,6 +31,7 @@ const comRegister = async (req, res) => {
       name,
       address,
       domain,
+      logoUrl,
       email,
       password,
     });
@@ -94,9 +95,10 @@ const comLogin = asyncHandler(async (req, res) => {
 
 const getAllCompanies = async (req, res) => {
   try {
-    const companies = await Company.find({}, "name domain address email").sort({
-      name: 1,
-    });
+    const companies = await Company.find(
+      {},
+      "name domain address email logoUrl"
+    ).sort({ name: 1 });
     res.json(companies);
   } catch (error) {
     console.error("Error fetching companies:", error);

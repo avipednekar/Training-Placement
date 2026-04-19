@@ -11,30 +11,39 @@ const companies = [
     name: "Tata Consultancy Services",
     domain: "IT Services",
     address: "Bengaluru",
+    logoUrl:
+      "https://www.tcs.com/content/dam/global-tcs/en/images/who-we-are/media-kit/TCS-logo-black-CMYK.svg",
     email: "campus.hiring@tcs.demo",
   },
   {
     name: "Infosys",
     domain: "Digital Services",
     address: "Mysuru",
+    logoUrl:
+      "https://www.infosys.com/content/dam/infosys-web/en/global-resource/media-resources/infosys-logo-png.png",
     email: "campus.hiring@infosys.demo",
   },
   {
     name: "Wipro",
     domain: "Consulting",
     address: "Hyderabad",
+    logoUrl: "/assets/company-logos/wipro-official.svg",
     email: "earlycareers@wipro.demo",
   },
   {
     name: "Cognizant",
     domain: "Technology",
     address: "Chennai",
+    logoUrl:
+      "https://mma.prnewswire.com/media/1794711/Cognizant_Logo.jpg?p=facebook",
     email: "fresher.jobs@cognizant.demo",
   },
   {
     name: "Capgemini",
     domain: "Engineering",
     address: "Pune",
+    logoUrl:
+      "https://www.capgemini.com/wp-content/themes/capgemini2025/assets/images/logo.svg",
     email: "campus@capgemini.demo",
   },
 ];

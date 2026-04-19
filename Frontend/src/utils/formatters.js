@@ -1,3 +1,5 @@
+import { getCompanyLogo } from "./companyBranding";
+
 /**
  * Formats raw job data from backend snake_case to frontend camelCase
  * Handles null/undefined values and provides defaults
@@ -11,9 +13,11 @@ export const formatJobData = (job) => {
     _id: job._id,
     id: job._id,
     title: job.job_title || job.title || "Untitled Position",
-    companyName:
-      job.companyId?.name || job.companyName || "Company Confidential",
-    companyLogo: job.companyId?.logo || null, // Future proofing for actual logos
+    companyName: job.companyId?.name || job.companyName || "Company Confidential",
+    companyLogo: getCompanyLogo(
+      job.companyId?.name || job.companyName,
+      job.companyId?.logoUrl || job.companyLogo || null
+    ),
     location: job.job_location || job.location || "Remote",
     type: job.job_type || job.jobType || "Full Time",
     salary: job.salary || "Not Disclosed",

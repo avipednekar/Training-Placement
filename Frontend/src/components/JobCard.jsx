@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import CompanyLogo from './ui/CompanyLogo';
 
 const JobCard = ({ job }) => {
     // Helper for visual tags
@@ -13,9 +14,13 @@ const JobCard = ({ job }) => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all p-6 flex flex-col h-full group">
             <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center text-xl font-bold text-gray-400 border border-gray-100">
-                        {job.companyName ? job.companyName.charAt(0) : 'C'}
-                    </div>
+                    <CompanyLogo
+                        companyName={job.companyName}
+                        logoUrl={job.companyLogo}
+                        sizeClass="w-12 h-12"
+                        roundedClass="rounded-lg"
+                        textClass="text-xl"
+                    />
                     <div>
                         <h3 className="font-bold text-gray-800 line-clamp-1 group-hover:text-primary transition-colors">{job.title}</h3>
                         <p className="text-sm text-gray-500">{job.companyName}</p>
