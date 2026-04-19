@@ -78,6 +78,7 @@ const CompanyJobs = () => {
                                 </td>
                                 <td className="p-4">
                                     <Link to={`/company/jobs/edit/${job._id}`} className="text-blue-600 hover:text-blue-800 mr-3">Edit</Link>
+                                    <Link to={`/company/applicants?jobId=${job._id}`} className="text-emerald-600 hover:text-emerald-800 mr-3">Eligible Students</Link>
                                     <button onClick={() => handleDelete(job._id)} className="text-red-600 hover:text-red-800">Delete</button>
                                 </td>
                             </tr>

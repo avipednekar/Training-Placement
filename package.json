@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "concurrently \"npm run start --prefix Backend\" \"npm run dev --prefix Frontend\"",
-    "install-all": "npm install && npm install --prefix Backend && npm install --prefix Frontend"
+    "install-all": "npm install && npm install --prefix Backend && npm install --prefix Frontend",
+    "seed:fresh": "npm run seed:fresh --prefix Backend"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

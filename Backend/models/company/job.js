@@ -1,5 +1,27 @@
 import mongoose from "mongoose";
 
+const eligibilitySchema = new mongoose.Schema(
+  {
+    minCgpa: {
+      type: Number,
+      default: 0,
+    },
+    maxBacklogs: {
+      type: Number,
+      default: 99,
+    },
+    branches: {
+      type: [String],
+      default: [],
+    },
+    graduationYears: {
+      type: [String],
+      default: [],
+    },
+  },
+  { _id: false }
+);
+
 const jobSchema = new mongoose.Schema(
   {
     companyId: {
@@ -27,6 +49,10 @@ const jobSchema = new mongoose.Schema(
     },
     criteria: {
       type: String,
+    },
+    eligibility: {
+      type: eligibilitySchema,
+      default: () => ({}),
     },
     job_location: {
       type: String,

@@ -12,6 +12,7 @@ import CompanyLayout from './pages/company/CompanyLayout';
 import CompanyOverview from './pages/company/CompanyOverview';
 import CompanyPostJob from './pages/company/CompanyPostJob';
 import CompanyJobs from './pages/company/CompanyJobs';
+import CompanyApplicants from './pages/company/CompanyApplicants';
 import StudentJobApplication from './pages/student/StudentJobApplication';
 import StudentJobs from './pages/student/StudentJobs';
 import PublicJobs from './pages/PublicJobs';
@@ -65,7 +66,7 @@ function App() {
             <Route path="post-job" element={<CompanyPostJob />} />
             <Route path="jobs" element={<CompanyJobs />} />
             <Route path="jobs/edit/:id" element={<CompanyPostJob />} />
-            <Route path="applicants" element={<ComingSoon title="Applicants" />} />
+            <Route path="applicants" element={<CompanyApplicants />} />
           </Route>
 
           <Route path="/company/login" element={<CompanyLogin />} />

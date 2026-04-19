@@ -11,7 +11,11 @@ const CompanyPostJob = () => {
     const [formData, setFormData] = useState({
         jobTitle: '', location: '', jobType: 'Full-time',
         vacancies: '', salary: '', eligibility: '',
-        skillsRequired: '', deadline: ''
+        skillsRequired: '', deadline: '',
+        minCgpa: '7',
+        maxBacklogs: '0',
+        eligibleBranches: 'CSE, IT',
+        graduationYears: '2026'
     });
 
     useEffect(() => {
@@ -30,9 +34,13 @@ const CompanyPostJob = () => {
                 jobType: job.job_type,
                 vacancies: job.vacancy,
                 salary: job.salary,
-                eligibility: job.criteria, // Mapping criteria to eligibility
+                eligibility: job.criteria,
                 skillsRequired: job.skills.join(', '),
-                deadline: job.deadline ? job.deadline.split('T')[0] : ''
+                deadline: job.deadline ? job.deadline.split('T')[0] : '',
+                minCgpa: String(job.eligibility?.minCgpa ?? 0),
+                maxBacklogs: String(job.eligibility?.maxBacklogs ?? 99),
+                eligibleBranches: (job.eligibility?.branches || []).join(', '),
+                graduationYears: (job.eligibility?.graduationYears || []).join(', ')
             });
         } catch (error) {
             console.error("Error fetching job details:", error);
@@ -48,6 +56,13 @@ const CompanyPostJob = () => {
         e.preventDefault();
         setLoading(true);
         try {
+            const eligibility = {
+                minCgpa: Number(formData.minCgpa || 0),
+                maxBacklogs: Number(formData.maxBacklogs || 99),
+                branches: formData.eligibleBranches.split(',').map(s => s.trim()).filter(Boolean),
+                graduationYears: formData.graduationYears.split(',').map(s => s.trim()).filter(Boolean),
+            };
+
             const payload = {
                 job_title: formData.jobTitle,
                 job_location: formData.location,
@@ -57,7 +72,8 @@ const CompanyPostJob = () => {
                 salary: formData.salary,
                 deadline: formData.deadline,
                 criteria: formData.eligibility,
-                job_des: `Eligibility: ${formData.eligibility}` // Keeping logic consistent
+                eligibility,
+                job_des: `Eligibility: ${formData.eligibility || 'See structured eligibility below.'}`
             };
 
             if (isEditMode) {
@@ -120,6 +136,26 @@ const CompanyPostJob = () => {
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Eligibility Criteria</label>
                     <textarea name="eligibility" value={formData.eligibility} className="w-full p-3 border rounded" rows="2" placeholder="e.g. B.Tech CSE, > 7.0 CGPA" onChange={handleChange}></textarea>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Minimum CGPA</label>
+                        <input name="minCgpa" value={formData.minCgpa} type="number" step="0.1" min="0" max="10" className="w-full p-3 border rounded" onChange={handleChange} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Maximum Backlogs</label>
+                        <input name="maxBacklogs" value={formData.maxBacklogs} type="number" min="0" className="w-full p-3 border rounded" onChange={handleChange} />
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Eligible Branches</label>
+                        <input name="eligibleBranches" value={formData.eligibleBranches} className="w-full p-3 border rounded" placeholder="CSE, IT, ECE" onChange={handleChange} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Graduation Years</label>
+                        <input name="graduationYears" value={formData.graduationYears} className="w-full p-3 border rounded" placeholder="2026, 2027" onChange={handleChange} />
+                    </div>
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Application Deadline</label>
