@@ -1,11 +1,28 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 
 const StudentOverview = () => {
-    const { user } = useAuth();
-    const [stats, setStats] = useState({ applications: 0, interviews: 0, offers: 0 });
+    const [stats, setStats] = useState({ applications: 0, interviews: 0, offers: 0, eligibleJobs: 0 });
+    const [topJobs, setTopJobs] = useState([]);
+
+    useEffect(() => {
+        const fetchEligibleJobs = async () => {
+            try {
+                const response = await api.get('/jobs/eligible-for-me');
+                const eligibleJobs = response.data?.eligibleJobs || [];
+                setStats((prev) => ({
+                    ...prev,
+                    eligibleJobs: eligibleJobs.length,
+                }));
+                setTopJobs(eligibleJobs.slice(0, 3));
+            } catch (error) {
+                console.error('Error fetching eligible jobs:', error);
+            }
+        };
+
+        fetchEligibleJobs();
+    }, []);
 
     return (
         <div>
@@ -20,11 +37,11 @@ const StudentOverview = () => {
                 <div className="bg-white p-6 rounded-lg border border-gray-100 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-gray-500 text-sm">Total Applications</p>
-                            <h3 className="text-3xl font-bold text-gray-800 mt-1">{stats.applications}</h3>
+                            <p className="text-gray-500 text-sm">Eligible Jobs</p>
+                            <h3 className="text-3xl font-bold text-gray-800 mt-1">{stats.eligibleJobs}</h3>
                         </div>
                         <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-primary">
-                            <i className="ri-file-list-3-line text-xl"></i>
+                            <i className="ri-briefcase-line text-xl"></i>
                         </div>
                     </div>
                 </div>
@@ -53,10 +70,27 @@ const StudentOverview = () => {
             </div>
 
             <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-6">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">Recent Activity</h2>
-                <div className="text-center text-gray-500 py-8">
-                    No recent activity found. Start applying to jobs!
-                </div>
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">Top Eligible Jobs</h2>
+                {topJobs.length ? (
+                    <div className="space-y-4">
+                        {topJobs.map((job) => (
+                            <div key={job._id} className="flex items-center justify-between rounded-lg border border-gray-100 px-4 py-3">
+                                <div>
+                                    <h3 className="font-medium text-gray-800">{job.title}</h3>
+                                    <p className="text-sm text-gray-500">{job.companyName} · {job.location}</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-sm font-medium text-emerald-700">{job.skillMatchPercentage}% match</p>
+                                    <Link to="/student/jobs" className="text-sm text-primary hover:text-blue-700">View jobs</Link>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center text-gray-500 py-8">
+                        No eligible jobs available for your current profile.
+                    </div>
+                )}
             </div>
         </div>
     );

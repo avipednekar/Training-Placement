@@ -4,6 +4,11 @@ import { useAuth } from '../context/AuthContext';
 const RequireAuth = ({ role, children }) => {
     const { user, loading } = useAuth();
     const location = useLocation();
+    const getDashboardPath = (userRole) => {
+        if (userRole === 'company') return '/company/dashboard';
+        if (userRole === 'admin') return '/admin/dashboard';
+        return '/student/dashboard';
+    };
 
     if (loading) {
         return (
@@ -14,13 +19,16 @@ const RequireAuth = ({ role, children }) => {
     }
 
     if (!user) {
-        const redirectTo = role === 'company' ? '/company/login' : '/student/login';
+        const redirectTo = role === 'company'
+            ? '/company/login'
+            : role === 'admin'
+                ? '/admin/login'
+                : '/student/login';
         return <Navigate to={redirectTo} replace state={{ from: location }} />;
     }
 
     if (role && user.role !== role) {
-        // Redirect to the appropriate dashboard based on actual role
-        const target = user.role === 'company' ? '/company/dashboard' : '/student/dashboard';
+        const target = getDashboardPath(user.role);
         return <Navigate to={target} replace />;
     }
 

@@ -260,7 +260,7 @@ export const findPublicJobById = async (jobId) => {
 };
 
 export const getPublicJobsList = async (limit = 0) => {
-  let query = JobPost.find({ status: { $ne: "closed" } })
+  let query = JobPost.find({ status: { $ne: "Closed" } })
     .sort({ createdAt: -1 })
     .populate("companyId", "name");
 
@@ -272,7 +272,7 @@ export const getPublicJobsList = async (limit = 0) => {
 };
 
 export const getActiveJobCount = async () => {
-  return JobPost.countDocuments({ status: { $ne: "closed" } });
+  return JobPost.countDocuments({ status: { $ne: "Closed" } });
 };
 
 export const applyForJob = async (studentId, jobId) => {
@@ -315,41 +315,7 @@ export const getEligibleStudentsForJob = async (companyId, jobId) => {
     .populate("student", "fullName email rollNo branch")
     .lean();
 
-  const eligibleStudents = profiles
-    .filter((profile) => profile.student)
-    .map((profile) => {
-      const student = profile.student;
-      const evaluation = evaluateStudentEligibility({ job, student, profile });
-
-      return {
-        studentId: student._id,
-        fullName: student.fullName,
-        email: student.email,
-        rollNo: student.rollNo,
-        branch:
-          evaluation.profileSnapshot.branch || profile.department || student.branch,
-        cgpa: evaluation.profileSnapshot.cgpa,
-        backlogs: evaluation.profileSnapshot.backlogs,
-        graduationYear: evaluation.profileSnapshot.graduationYear,
-        phone: profile.phone || null,
-        linkedin: profile.linkedin || "",
-        github: profile.github || "",
-        resume: profile.resume || "",
-        matchedSkills: evaluation.matchedSkills,
-        missingSkills: evaluation.missingSkills,
-        skillMatchPercentage: evaluation.skillMatchPercentage,
-        eligibilityReasons: evaluation.reasons,
-        isEligible: evaluation.isEligible,
-      };
-    })
-    .filter((student) => student.isEligible)
-    .sort((left, right) => {
-      if (right.skillMatchPercentage !== left.skillMatchPercentage) {
-        return right.skillMatchPercentage - left.skillMatchPercentage;
-      }
-
-      return (right.cgpa || 0) - (left.cgpa || 0);
-    });
+  const eligibleStudents = buildEligibleStudentsForJob(job, profiles);
 
   return {
     job: {
@@ -364,6 +330,157 @@ export const getEligibleStudentsForJob = async (companyId, jobId) => {
       minSkillMatchPercentage: MIN_SHORTLIST_SKILL_MATCH_PERCENTAGE,
     },
     eligibleStudents,
+  };
+};
+
+const toShortlistedStudent = (student, profile, evaluation) => ({
+  studentId: student._id,
+  fullName: student.fullName,
+  email: student.email,
+  rollNo: student.rollNo,
+  branch:
+    evaluation.profileSnapshot.branch || profile.department || student.branch,
+  cgpa: evaluation.profileSnapshot.cgpa,
+  backlogs: evaluation.profileSnapshot.backlogs,
+  graduationYear: evaluation.profileSnapshot.graduationYear,
+  phone: profile.phone || null,
+  linkedin: profile.linkedin || "",
+  github: profile.github || "",
+  resume: profile.resume || "",
+  matchedSkills: evaluation.matchedSkills,
+  missingSkills: evaluation.missingSkills,
+  skillMatchPercentage: evaluation.skillMatchPercentage,
+  eligibilityReasons: evaluation.reasons,
+  isEligible: evaluation.isEligible,
+});
+
+const sortShortlistedStudents = (students) =>
+  students.sort((left, right) => {
+    if (right.skillMatchPercentage !== left.skillMatchPercentage) {
+      return right.skillMatchPercentage - left.skillMatchPercentage;
+    }
+
+    return (right.cgpa || 0) - (left.cgpa || 0);
+  });
+
+const buildEligibleStudentsForJob = (job, profiles) =>
+  sortShortlistedStudents(
+    profiles
+      .filter((profile) => profile.student)
+      .map((profile) => {
+        const student = profile.student;
+        const evaluation = evaluateStudentEligibility({ job, student, profile });
+        return toShortlistedStudent(student, profile, evaluation);
+      })
+      .filter((student) => student.isEligible)
+  );
+
+export const getEligibleJobsForStudent = async (studentId) => {
+  const student = await Student.findById(studentId).select(
+    "fullName email rollNo branch"
+  );
+
+  if (!student) {
+    const error = new Error("Student not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const profile = await Profile.findOne({ student: studentId }).lean();
+  const jobs = await JobPost.find({ status: { $ne: "Closed" } })
+    .sort({ createdAt: -1 })
+    .populate("companyId", "name")
+    .lean();
+
+  const eligibleJobs = jobs
+    .map((job) => {
+      const evaluation = evaluateStudentEligibility({ job, student, profile });
+
+      return {
+        _id: job._id,
+        title: job.job_title,
+        jobType: job.job_type,
+        location: job.job_location,
+        salary: job.salary,
+        deadline: job.deadline,
+        companyName: job.companyId?.name || "Unknown Company",
+        criteria: job.criteria,
+        skills: sanitizeStringList(job.skills, toTitleCase),
+        matchedSkills: evaluation.matchedSkills,
+        missingSkills: evaluation.missingSkills,
+        skillMatchPercentage: evaluation.skillMatchPercentage,
+        isEligible: evaluation.isEligible,
+        postedAt: job.createdAt,
+      };
+    })
+    .filter((job) => job.isEligible)
+    .sort((left, right) => {
+      if (right.skillMatchPercentage !== left.skillMatchPercentage) {
+        return right.skillMatchPercentage - left.skillMatchPercentage;
+      }
+
+      return new Date(left.deadline) - new Date(right.deadline);
+    });
+
+  return {
+    student: {
+      fullName: student.fullName,
+      email: student.email,
+      branch: profile?.department || student.branch,
+      cgpa: profile?.cgpa ?? null,
+    },
+    shortlistRules: {
+      minSkillMatchPercentage: MIN_SHORTLIST_SKILL_MATCH_PERCENTAGE,
+    },
+    eligibleJobs,
+  };
+};
+
+export const getEligibilityOverviewForAdmin = async () => {
+  const [jobs, profiles] = await Promise.all([
+    JobPost.find({ status: { $ne: "Closed" } })
+      .sort({ createdAt: -1 })
+      .populate("companyId", "name")
+      .lean(),
+    Profile.find({})
+      .populate("student", "fullName email rollNo branch")
+      .lean(),
+  ]);
+
+  const jobShortlists = jobs
+    .map((job) => {
+      const eligibleStudents = buildEligibleStudentsForJob(job, profiles);
+
+      return {
+        jobId: job._id,
+        title: job.job_title,
+        companyName: job.companyId?.name || "Unknown Company",
+        location: job.job_location,
+        deadline: job.deadline,
+        totalEligibleStudents: eligibleStudents.length,
+        eligibility: sanitizeEligibility(job.eligibility),
+        criteria: job.criteria,
+        skills: sanitizeStringList(job.skills, toTitleCase),
+        eligibleStudents,
+      };
+    })
+    .sort((left, right) => right.totalEligibleStudents - left.totalEligibleStudents);
+
+  return {
+    shortlistRules: {
+      minSkillMatchPercentage: MIN_SHORTLIST_SKILL_MATCH_PERCENTAGE,
+    },
+    summary: {
+      totalJobs: jobShortlists.length,
+      totalEligibleMappings: jobShortlists.reduce(
+        (sum, job) => sum + job.totalEligibleStudents,
+        0
+      ),
+      jobsWithEligibleStudents: jobShortlists.filter(
+        (job) => job.totalEligibleStudents > 0
+      ).length,
+    },
+    jobs: jobShortlists,
   };
 };
 

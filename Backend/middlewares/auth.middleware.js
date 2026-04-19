@@ -2,6 +2,8 @@ import jwt from "jsonwebtoken";
 import { Student } from "../models/student/register.model.js";
 import { Company } from "../models/company/register.js";
 
+const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "admin@tpo.local").toLowerCase();
+
 const getTokenFromRequest = (req) => {
   const authHeader = req.header("Authorization");
   if (authHeader && authHeader.startsWith("Bearer ")) {
@@ -115,4 +117,37 @@ const requireCompany = async (req, res, next) => {
   }
 };
 
-export { verifyJWT, requireStudent, requireCompany };
+const requireAdmin = async (req, res, next) => {
+  try {
+    const decoded = verifyAccessToken(req, res);
+
+    if (
+      decoded?.role !== "admin" ||
+      String(decoded?.email || "").toLowerCase() !== ADMIN_EMAIL
+    ) {
+      return sendAuthError(res, "ADMIN_ONLY", "Admin access is required", 403);
+    }
+
+    req.admin = {
+      email: ADMIN_EMAIL,
+      role: "admin",
+      name: "Admin",
+    };
+    req.auth = {
+      userId: ADMIN_EMAIL,
+      role: "admin",
+      email: ADMIN_EMAIL,
+    };
+
+    next();
+  } catch (err) {
+    return sendAuthError(
+      res,
+      err.code || "AUTH_ERROR",
+      err.message || "Authentication failed",
+      err.statusCode || 401
+    );
+  }
+};
+
+export { verifyJWT, requireStudent, requireCompany, requireAdmin };

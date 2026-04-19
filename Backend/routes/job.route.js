@@ -10,6 +10,7 @@ import {
   getMyJobs,
   getPublicJobById,
   getEligibleStudentsForJob,
+  getEligibleJobsForStudent,
 } from "../controllers/company/job.controller.js";
 import {
   requireCompany,
@@ -25,6 +26,7 @@ jobRouter.route("/public/:id").get(getPublicJobById);
 
 // Student-protected endpoint
 jobRouter.route("/apply").post(requireStudent, applyJob);
+jobRouter.route("/eligible-for-me").get(requireStudent, getEligibleJobsForStudent);
 
 // Company-protected endpoints
 jobRouter.route("/my-jobs").get(requireCompany, getMyJobs);

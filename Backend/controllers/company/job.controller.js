@@ -9,6 +9,7 @@ import {
   getActiveJobCount,
   applyForJob as applyForJobService,
   getEligibleStudentsForJob as getEligibleStudentsForJobService,
+  getEligibleJobsForStudent as getEligibleJobsForStudentService,
 } from "../../services/job.service.js";
 
 export const getCompanyJobs = async (req, res) => {
@@ -151,6 +152,19 @@ export const getEligibleStudentsForJob = async (req, res) => {
     console.error(error);
     res.status(error.statusCode || 500).json({
       message: error.message || "Error fetching eligible students",
+    });
+  }
+};
+
+export const getEligibleJobsForStudent = async (req, res) => {
+  try {
+    const studentId = req.student?._id;
+    const result = await getEligibleJobsForStudentService(studentId);
+    res.json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(error.statusCode || 500).json({
+      message: error.message || "Error fetching eligible jobs",
     });
   }
 };

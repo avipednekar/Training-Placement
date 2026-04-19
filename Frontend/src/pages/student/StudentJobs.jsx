@@ -6,6 +6,7 @@ const StudentJobs = () => {
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [shortlistRule, setShortlistRule] = useState(51);
 
     useEffect(() => {
         fetchJobs();
@@ -13,15 +14,9 @@ const StudentJobs = () => {
 
     const fetchJobs = async () => {
         try {
-            const response = await api.get('/jobs/public');
-            const formattedJobs = response.data.map(job => ({
-                ...job,
-                title: job.job_title,
-                jobType: job.job_type,
-                location: job.job_location,
-                companyName: job.companyId?.name || "Unknown Company"
-            }));
-            setJobs(formattedJobs);
+            const response = await api.get('/jobs/eligible-for-me');
+            setJobs(response.data?.eligibleJobs || []);
+            setShortlistRule(response.data?.shortlistRules?.minSkillMatchPercentage || 51);
         } catch (error) {
             console.error("Error fetching jobs:", error);
         } finally {
@@ -37,7 +32,10 @@ const StudentJobs = () => {
     return (
         <div>
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-gray-800">Available Jobs</h1>
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-800">Eligible Jobs</h1>
+                    <p className="text-sm text-gray-500 mt-1">Only jobs where you satisfy academic rules and exceed {shortlistRule - 1}% skill match are shown.</p>
+                </div>
                 <input
                     type="text"
                     placeholder="Search jobs..."
@@ -61,6 +59,15 @@ const StudentJobs = () => {
                                 <div className="flex items-center"><i className="ri-map-pin-line mr-2"></i> {job.location}</div>
                                 <div className="flex items-center"><i className="ri-money-dollar-circle-line mr-2"></i> {job.salary}</div>
                                 <div className="flex items-center"><i className="ri-calendar-line mr-2"></i> Deadline: {new Date(job.deadline).toLocaleDateString()}</div>
+                                <div className="flex items-center"><i className="ri-award-line mr-2"></i> Skill Match: {job.skillMatchPercentage}%</div>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2 mb-4">
+                                {job.matchedSkills?.map((skill) => (
+                                    <span key={skill} className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+                                        {skill}
+                                    </span>
+                                ))}
                             </div>
 
                             <Link to={`/student/apply/${job._id}`} className="block w-full bg-white text-primary border border-primary text-center py-2 rounded hover:bg-primary hover:text-white transition-colors">
@@ -68,7 +75,7 @@ const StudentJobs = () => {
                             </Link>
                         </div>
                     ))}
-                    {filteredJobs.length === 0 && <p className="col-span-full text-center text-gray-500">No jobs found matching your search.</p>}
+                    {filteredJobs.length === 0 && <p className="col-span-full text-center text-gray-500">No eligible jobs found for your current profile and skills.</p>}
                 </div>
             )}
         </div>

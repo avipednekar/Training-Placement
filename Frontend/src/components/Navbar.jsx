@@ -35,15 +35,12 @@ const Navbar = () => {
 
                     {user ? (
                         <>
-                            {user.role === 'student' ? (
-                                <Link to="/student/dashboard" className={`font-medium px-3 py-2 rounded-md transition-all ${isActive('/student/dashboard')}`}>
-                                    Dashboard
-                                </Link>
-                            ) : (
-                                <Link to="/company/dashboard" className={`font-medium px-3 py-2 rounded-md transition-all ${isActive('/company/dashboard')}`}>
-                                    Dashboard
-                                </Link>
-                            )}
+                            <Link
+                                to={user.role === 'student' ? '/student/dashboard' : user.role === 'admin' ? '/admin/dashboard' : '/company/dashboard'}
+                                className={`font-medium px-3 py-2 rounded-md transition-all ${isActive(user.role === 'student' ? '/student/dashboard' : user.role === 'admin' ? '/admin/dashboard' : '/company/dashboard')}`}
+                            >
+                                Dashboard
+                            </Link>
                             <div className="flex items-center space-x-3 ml-4">
                                 <div className="flex flex-col items-end">
                                     <span className="text-sm font-semibold text-white">
@@ -68,6 +65,9 @@ const Navbar = () => {
                             </Link>
                             <Link to="/company/login" className="text-white border border-gray-600 hover:border-white hover:bg-gray-800 px-4 py-2 rounded-md transition-all font-medium">
                                 Company
+                            </Link>
+                            <Link to="/admin/login" className="text-white border border-amber-600 hover:bg-amber-700 hover:border-amber-500 px-4 py-2 rounded-md transition-all font-medium">
+                                Admin
                             </Link>
                         </div>
                     )}
