@@ -1,22 +1,36 @@
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { getEligibilityOverviewForAdmin } from "../../services/job.service.js";
 
-// Require environment variables - fail startup if missing
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
-const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH;
+const getAdminCredentials = () => {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
 
-if (!ADMIN_EMAIL) {
-  throw new Error("ADMIN_EMAIL environment variable is required");
-}
-if (!ADMIN_PASSWORD_HASH) {
-  throw new Error("ADMIN_PASSWORD_HASH environment variable is required (bcrypt hash)");
-}
+  if (!adminEmail) {
+    return null;
+  }
 
-const ADMIN_EMAIL_LOWER = ADMIN_EMAIL.toLowerCase();
+  if (!adminPasswordHash) {
+    return null;
+  }
+
+  return {
+    adminEmailLower: adminEmail.toLowerCase(),
+    adminPasswordHash,
+  };
+};
 
 export const adminLogin = async (req, res) => {
   try {
+    const adminCredentials = getAdminCredentials();
+
+    if (!adminCredentials) {
+      return res.status(503).json({
+        message: "Admin login is not configured. Set ADMIN_EMAIL and ADMIN_PASSWORD_HASH.",
+      });
+    }
+
+    const { adminEmailLower, adminPasswordHash } = adminCredentials;
     const email = String(req.body?.email || "").trim().toLowerCase();
     const password = String(req.body?.password || "");
 
@@ -26,18 +40,18 @@ export const adminLogin = async (req, res) => {
         .json({ message: "Email and password are required" });
     }
 
-    if (email !== ADMIN_EMAIL_LOWER) {
+    if (email !== adminEmailLower) {
       return res.status(401).json({ message: "Invalid admin credentials" });
     }
 
-    const passwordMatch = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
+    const passwordMatch = await bcrypt.compare(password, adminPasswordHash);
     if (!passwordMatch) {
       return res.status(401).json({ message: "Invalid admin credentials" });
     }
 
     const accessToken = jwt.sign(
       {
-        email: ADMIN_EMAIL_LOWER,
+        email: adminEmailLower,
         role: "admin",
       },
       process.env.ACCESS_TOKEN_SECRET,
@@ -48,7 +62,7 @@ export const adminLogin = async (req, res) => {
       message: "Admin login successful",
       accessToken,
       adminUser: {
-        email: ADMIN_EMAIL_LOWER,
+        email: adminEmailLower,
         role: "admin",
         name: "Admin",
       },

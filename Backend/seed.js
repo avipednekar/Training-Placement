@@ -1,12 +1,10 @@
 import mongoose from "mongoose";
-import dotenv from "dotenv";
+import "./config/loadEnv.js";
 import { Company } from "./models/company/register.js";
 import { JobPost } from "./models/company/job.js";
 import { CompanyStats } from "./models/company/stats.js";
 import { Student } from "./models/student/register.model.js";
 import { Profile } from "./models/student/profile.model.js";
-
-dotenv.config();
 
 const companies = [
   {
