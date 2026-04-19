@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import {
   getCompanyJobsForId,
   createOrUpdateCompanyJob,
@@ -72,6 +73,10 @@ export const deleteJob = async (req, res) => {
 
 export const getJobById = async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: "Invalid job id" });
+    }
+
     const job = await findJobById(req.params.id);
     if (!job) return res.status(404).json({ message: "Job not found" });
     res.json(job);
@@ -83,6 +88,10 @@ export const getJobById = async (req, res) => {
 
 export const getPublicJobById = async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: "Invalid job id" });
+    }
+
     const job = await findPublicJobById(req.params.id);
     if (!job) return res.status(404).json({ message: "Job not found" });
     res.json(job);

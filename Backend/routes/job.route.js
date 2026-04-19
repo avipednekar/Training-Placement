@@ -22,7 +22,6 @@ const jobRouter = Router();
 jobRouter.route("/count").get(getJobCount);
 jobRouter.route("/public").get(getPublicJobs);
 jobRouter.route("/public/:id").get(getPublicJobById);
-jobRouter.route("/:id").get(getJobById);
 
 // Student-protected endpoint
 jobRouter.route("/apply").post(requireStudent, applyJob);
@@ -37,5 +36,8 @@ jobRouter
   .get(requireCompany, getCompanyJobs); // Corresponds to /company-jobs/:companyId
 jobRouter.route("/").post(requireCompany, createOrUpdateJob);
 jobRouter.route("/:jobId").delete(requireCompany, deleteJob);
+
+// Keep generic ID route last so it doesn't swallow named routes like /my-jobs
+jobRouter.route("/:id").get(getJobById);
 
 export default jobRouter;
