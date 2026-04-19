@@ -3,6 +3,8 @@ import { CompanyStats } from "../models/company/stats.js";
 import { Student } from "../models/student/register.model.js";
 import { Profile } from "../models/student/profile.model.js";
 
+const MIN_SHORTLIST_SKILL_MATCH_PERCENTAGE = 51;
+
 const normalizeText = (value) => String(value || "").trim().toLowerCase();
 
 const toTitleCase = (value) =>
@@ -149,6 +151,12 @@ const evaluateStudentEligibility = ({ job, student, profile }) => {
   const skillMatchPercentage = requiredSkills.length
     ? Math.round((matchedSkills.length / requiredSkills.length) * 100)
     : 100;
+
+  if (requiredSkills.length && skillMatchPercentage < MIN_SHORTLIST_SKILL_MATCH_PERCENTAGE) {
+    reasons.push(
+      `Skill match is below the shortlist threshold of ${MIN_SHORTLIST_SKILL_MATCH_PERCENTAGE}%`
+    );
+  }
 
   return {
     isEligible: reasons.length === 0,
@@ -351,6 +359,9 @@ export const getEligibleStudentsForJob = async (companyId, jobId) => {
       eligibility: sanitizeEligibility(job.eligibility),
       skills: sanitizeStringList(job.skills, toTitleCase),
       criteria: job.criteria,
+    },
+    shortlistRules: {
+      minSkillMatchPercentage: MIN_SHORTLIST_SKILL_MATCH_PERCENTAGE,
     },
     eligibleStudents,
   };

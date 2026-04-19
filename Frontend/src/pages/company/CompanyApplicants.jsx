@@ -80,7 +80,7 @@ const CompanyApplicants = () => {
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800">Eligible Students</h1>
                     <p className="text-gray-500 mt-1">
-                        Generate an automatic shortlist using branch, CGPA, backlog, graduation year, and skill fit.
+                        Show only students who pass academic criteria and have more than 50% skill match for the job.
                     </p>
                 </div>
 
@@ -124,6 +124,7 @@ const CompanyApplicants = () => {
                         <p><span className="font-medium text-gray-800">Branches:</span> {shortlist.job.eligibility.branches.join(', ') || 'Any'}</p>
                         <p><span className="font-medium text-gray-800">Graduation Years:</span> {shortlist.job.eligibility.graduationYears.join(', ') || 'Any'}</p>
                         <p><span className="font-medium text-gray-800">Preferred Skills:</span> {shortlist.job.skills.join(', ') || 'None specified'}</p>
+                        <p><span className="font-medium text-gray-800">Skill Threshold:</span> Above {shortlist.shortlistRules?.minSkillMatchPercentage - 1}% match</p>
                         <p><span className="font-medium text-gray-800">Criteria Notes:</span> {shortlist.job.criteria || 'Generated from structured eligibility'}</p>
                     </div>
                 </div>
@@ -187,7 +188,7 @@ const CompanyApplicants = () => {
                     </div>
                 ) : (
                     <div className="p-8 text-center text-gray-500">
-                        No students match the academic eligibility for this job yet.
+                        No students currently satisfy both the academic rules and the above-50% skill match threshold.
                     </div>
                 )}
             </div>

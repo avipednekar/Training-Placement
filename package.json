@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "concurrently \"npm run start --prefix Backend\" \"npm run dev --prefix Frontend\"",
     "install-all": "npm install && npm install --prefix Backend && npm install --prefix Frontend",
-    "seed:fresh": "npm run seed:fresh --prefix Backend"
+    "seed:fresh": "npm run seed:fresh --prefix Backend",
+    "seed:realworld": "npm run seed:realworld --prefix Backend"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
