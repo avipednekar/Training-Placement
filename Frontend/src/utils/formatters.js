@@ -18,9 +18,8 @@ export const formatJobData = (job) => {
     type: job.job_type || job.jobType || "Full Time",
     salary: job.salary || "Not Disclosed",
     description:
-      job.job_des ||
-      job.job_description ||
-      job.description ||
+      job.job_des ??
+      job.description ??
       "No description available.",
     postedAt: job.createdAt || new Date().toISOString(),
     experience: job.experience || "Fresher", // Assuming field might exist

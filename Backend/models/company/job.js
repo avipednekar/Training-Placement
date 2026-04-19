@@ -4,11 +4,11 @@ const eligibilitySchema = new mongoose.Schema(
   {
     minCgpa: {
       type: Number,
-      default: 0,
+      default: 7,
     },
     maxBacklogs: {
       type: Number,
-      default: 99,
+      default: 0,
     },
     branches: {
       type: [String],

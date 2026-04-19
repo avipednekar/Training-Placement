@@ -103,7 +103,7 @@ const AdminDashboard = () => {
                                     <span className="text-sm text-gray-500">{selectedJob.totalEligibleStudents} shortlisted</span>
                                 </div>
 
-                                {selectedJob.eligibleStudents.length ? (
+                                {(selectedJob?.eligibleStudents?.length) ? (
                                     <div className="overflow-x-auto">
                                         <table className="w-full text-left">
                                             <thead className="bg-gray-50 border-b border-gray-100 text-sm text-gray-600">

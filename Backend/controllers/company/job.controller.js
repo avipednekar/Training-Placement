@@ -142,9 +142,15 @@ export const applyJob = async (req, res) => {
 export const getEligibleStudentsForJob = async (req, res) => {
   try {
     const companyId = req.company?._id;
+    const { jobId } = req.params;
+
+    if (!jobId || !mongoose.isValidObjectId(jobId)) {
+      return res.status(400).json({ message: "Invalid job ID" });
+    }
+
     const shortlist = await getEligibleStudentsForJobService(
       companyId,
-      req.params.jobId
+      jobId
     );
 
     res.json(shortlist);

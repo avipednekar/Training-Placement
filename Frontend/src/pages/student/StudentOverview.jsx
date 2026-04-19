@@ -7,21 +7,46 @@ const StudentOverview = () => {
     const [topJobs, setTopJobs] = useState([]);
 
     useEffect(() => {
-        const fetchEligibleJobs = async () => {
+        const fetchDashboardData = async () => {
             try {
-                const response = await api.get('/jobs/eligible-for-me');
-                const eligibleJobs = response.data?.eligibleJobs || [];
+                // Fetch eligible jobs
+                const jobsResponse = await api.get('/jobs/eligible-for-me');
+                const eligibleJobs = jobsResponse.data?.eligibleJobs || [];
                 setStats((prev) => ({
                     ...prev,
                     eligibleJobs: eligibleJobs.length,
                 }));
                 setTopJobs(eligibleJobs.slice(0, 3));
+
+                // Fetch application stats
+                const statsResponse = await api.get('/students/my-applications');
+                const applications = statsResponse.data?.applications || [];
+                
+                // Count interviews (applications with status 'interview' or similar)
+                const interviews = applications.filter(app => 
+                    app.status?.toLowerCase() === 'interview' || 
+                    app.status?.toLowerCase() === 'shortlisted'
+                ).length;
+                
+                // Count offers (applications with status 'offer' or 'selected')
+                const offers = applications.filter(app => 
+                    app.status?.toLowerCase() === 'offer' || 
+                    app.status?.toLowerCase() === 'selected' ||
+                    app.status?.toLowerCase() === 'placed'
+                ).length;
+
+                setStats((prev) => ({
+                    ...prev,
+                    applications: applications.length,
+                    interviews,
+                    offers,
+                }));
             } catch (error) {
-                console.error('Error fetching eligible jobs:', error);
+                console.error('Error fetching dashboard data:', error);
             }
         };
 
-        fetchEligibleJobs();
+        fetchDashboardData();
     }, []);
 
     return (

@@ -37,8 +37,8 @@ const CompanyPostJob = () => {
                 eligibility: job.criteria,
                 skillsRequired: job.skills.join(', '),
                 deadline: job.deadline ? job.deadline.split('T')[0] : '',
-                minCgpa: String(job.eligibility?.minCgpa ?? 0),
-                maxBacklogs: String(job.eligibility?.maxBacklogs ?? 99),
+                minCgpa: String(job.eligibility?.minCgpa ?? '7'),
+                maxBacklogs: String(job.eligibility?.maxBacklogs ?? '0'),
                 eligibleBranches: (job.eligibility?.branches || []).join(', '),
                 graduationYears: (job.eligibility?.graduationYears || []).join(', ')
             });
